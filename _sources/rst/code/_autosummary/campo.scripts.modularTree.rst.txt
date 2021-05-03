@@ -1,0 +1,39 @@
+﻿campo.scripts.modularTree
+=========================
+
+.. automodule:: campo.scripts.modularTree
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      main
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BranchNode
+      Tree
+      TreeParameters
+      TrunkNode
+      TwingNode
+   
+   
+
+   
+   
+   
+
+
+

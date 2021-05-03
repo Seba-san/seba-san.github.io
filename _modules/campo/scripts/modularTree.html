@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>campo.scripts.modularTree &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para campo.scripts.modularTree</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">La idea de este programa es que sirva para anotar las caracteristicas de cada</span>
+<span class="sd">opcion &quot;importante&quot; en modularTree addon. Funciona como una capa intermedia</span>
+<span class="sd">entre blender y el usuario final, algo asi como un traductor o un diccionario.</span>
+
+<span class="sd">Un video donde se explica casi todo: `Blender - Modular tree - tutorial en español &lt;https://youtu.be/frjwKK_Bw74&gt;`_</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">bpy</span>
+
+<div class="viewcode-block" id="TrunkNode"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode">[documentos]</a><span class="k">class</span> <span class="nc">TrunkNode</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tronco principal, este es el único objeto obligatorio</span>
+<span class="sd">    Para mayor información acceder a la libreria en github o mediante blender.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">node_groups</span><span class="p">[</span><span class="s2">&quot;NodeTree&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;Trunk Node&quot;</span><span class="p">]</span>
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="TrunkNode.setSeed"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode.setSeed">[documentos]</a>    <span class="k">def</span> <span class="nf">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           Con los otros parametros iguales, genera cierta aleatoridad en la</span>
+<span class="sd">           generacion del tronco </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="TrunkNode.setLength"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode.setLength">[documentos]</a>    <span class="k">def</span> <span class="nf">setLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="mf">10.1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Altura del tronco principal, en metros?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">length</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TrunkNode.setRadius"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode.setRadius">[documentos]</a>    <span class="k">def</span> <span class="nf">setRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">         Radio del tronco principal, en metros?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">radius</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TrunkNode.setEndRadius"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode.setEndRadius">[documentos]</a>    <span class="k">def</span> <span class="nf">setEndRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Radio de la punta del tronco</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">end_radius</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TrunkNode.setRandomness"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TrunkNode.setRandomness">[documentos]</a>    <span class="k">def</span> <span class="nf">setRandomness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">random</span><span class="o">=</span><span class="mf">0.11</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Segun la documentación: Determina que tan caotico se ve el tronco.</span>
+<span class="sd">        (los olivos suelen ser muy caoticos)</span>
+<span class="sd">        [0,0.5]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">randomness</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">random</span><span class="p">)</span>
+        <span class="k">return</span></div></div>
+
+<div class="viewcode-block" id="BranchNode"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode">[documentos]</a><span class="k">class</span> <span class="nc">BranchNode</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Este nodo determina las caracteristicas de como se comportan las ramas</span>
+<span class="sd">    Para mayor información acceder a la libreria en github o mediante blender.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">node_groups</span><span class="p">[</span><span class="s2">&quot;NodeTree&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;Branch Node&quot;</span><span class="p">]</span>
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="BranchNode.setSeed"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setSeed">[documentos]</a>    <span class="k">def</span> <span class="nf">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">           Con los otros parametros iguales, genera cierta aleatoridad en la</span>
+<span class="sd">           generacion del tronco </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BranchNode.setAmount"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setAmount">[documentos]</a>    <span class="k">def</span> <span class="nf">setAmount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">amount</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">6</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cantidad de ramas, depende del espacio en el tronco principal, y de</span>
+<span class="sd">        otras configs. No es exacto</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">amount</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setSplitAngle"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setSplitAngle">[documentos]</a>    <span class="k">def</span> <span class="nf">setSplitAngle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">angle</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Angulo con el que las ramas salen del tronco principal</span>
+<span class="sd">        [0, 1.5]. 0 Es totalmente paralelas hacia arriba y 1.5 es perpendicular</span>
+<span class="sd">        al tronco principal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">split_angle</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setRadius"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setRadius">[documentos]</a>    <span class="k">def</span> <span class="nf">setRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina el radio de las ramas como un porcentaje del radio del tronco</span>
+<span class="sd">        principal</span>
+<span class="sd">        [0,1] (va del 0% al 100%)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">radius</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setStart"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setStart">[documentos]</a>    <span class="k">def</span> <span class="nf">setStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">start</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina a partir de que altura salen las ramas. Esta expresado como</span>
+<span class="sd">        porcentaje de la altura total del tronco principal</span>
+<span class="sd">        [0,1]</span>
+<span class="sd">        No chekeado</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">shape_start</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setLength"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setLength">[documentos]</a>    <span class="k">def</span> <span class="nf">setLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">length</span><span class="o">=</span><span class="mf">5.1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Longitud de cada rama (en promedio) expresado en metros?.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">length</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setSplitProba"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setSplitProba">[documentos]</a>    <span class="k">def</span> <span class="nf">setSplitProba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prob</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina la probabilidad de que cada rama se vuelva a ramificar</span>
+<span class="sd">        nuevamente (iterando sobre ella misma)</span>
+<span class="sd">        [0,1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">split_proba</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setGravityStrength"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setGravityStrength">[documentos]</a>    <span class="k">def</span> <span class="nf">setGravityStrength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">strength</span><span class="o">=</span><span class="mf">1.1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define que tanta fuerza hace la grabedad. El valor tipico es 0, pero</span>
+<span class="sd">        puede ser -inf, +inf. Cuando es grande, simula que el arbol esta</span>
+<span class="sd">        cargado, cuando es bajo hace que la mayoria de las puntas miren hacia</span>
+<span class="sd">        arriba.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">gravity_strength</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">strength</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setFloorAvoidance"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setFloorAvoidance">[documentos]</a>    <span class="k">def</span> <span class="nf">setFloorAvoidance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        La rama mas baja, esta tan lejos del suelo como este parametro lo</span>
+<span class="sd">        defina. Si por alguna otra config, las ramas estan todas arriba, este</span>
+<span class="sd">        no le afecta.</span>
+<span class="sd">        [0,+inf]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">floor_avoidance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setCanSpawnLeaf"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setCanSpawnLeaf">[documentos]</a>    <span class="k">def</span> <span class="nf">setCanSpawnLeaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Permite o no que estas ramas tengan hojas. (Puede pasar que el trongo</span>
+<span class="sd">        haga un split, en ese lugar es raro ver ramas.)</span>
+<span class="sd">        False or True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">can_spawn_leafs</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.sefAdv"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.sefAdv">[documentos]</a>    <span class="k">def</span> <span class="nf">sefAdv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Habilita otras opciones. En este caso tiene el prefijo Adv</span>
+<span class="sd">        True or False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">advanced_settings</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="BranchNode.setAdvMaxSplitNumber"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.BranchNode.setAdvMaxSplitNumber">[documentos]</a>    <span class="k">def</span> <span class="nf">setAdvMaxSplitNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        No se que hace.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">max_split_number</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span></div></div>
+
+<div class="viewcode-block" id="TwingNode"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TwingNode">[documentos]</a><span class="k">class</span> <span class="nc">TwingNode</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Este nodo frabrica las hojas.</span>
+<span class="sd">    Genera un ramillete de hojas con palo.</span>
+<span class="sd">    Ver como incorporar las hojas realizadas ad-hoc.</span>
+<span class="sd">    Por ahora sin implementar.</span>
+<span class="sd">    Para mayor información acceder a la libreria en github o mediante blender.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="TwingNode.setLength"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TwingNode.setLength">[documentos]</a>    <span class="k">def</span> <span class="nf">setLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina el largo del palo de cada hoja. </span>
+<span class="sd">        [0,inf]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TwingNode.setRadius"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TwingNode.setRadius">[documentos]</a>    <span class="k">def</span> <span class="nf">setRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina el radio del palo de cada hoja.</span>
+<span class="sd">        [0,inf]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div>
+   
+<div class="viewcode-block" id="TwingNode.setBranchNumber"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TwingNode.setBranchNumber">[documentos]</a>    <span class="k">def</span> <span class="nf">setBranchNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina la cantidad de hojas por ramillete. No es exacto.</span>
+<span class="sd">        Es un numero entero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TwingNode.setLeafMaxRadius"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TwingNode.setLeafMaxRadius">[documentos]</a>    <span class="k">def</span> <span class="nf">setLeafMaxRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        determina el radio maximo de la rama desde donde puede salir una hoja.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div></div>
+
+<div class="viewcode-block" id="TreeParameters"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters">[documentos]</a><span class="k">class</span> <span class="nc">TreeParameters</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Para mayor información acceder a la libreria en github o mediante blender.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">node_groups</span><span class="p">[</span><span class="s2">&quot;NodeTree&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;Tree paramteters&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">mesh_type</span><span class="o">=</span><span class="s1">&#39;final&#39;</span>
+        <span class="k">return</span>
+    
+<div class="viewcode-block" id="TreeParameters.createLeaf"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters.createLeaf">[documentos]</a>    <span class="k">def</span> <span class="nf">createLeaf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setea si se van a generar hojas o no</span>
+<span class="sd">        False or True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">create_leaf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TreeParameters.setLeafAmount"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters.setLeafAmount">[documentos]</a>    <span class="k">def</span> <span class="nf">setLeafAmount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">amount</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determina la cantidad de hojas. Cuidado, esto genera modelos muy</span>
+<span class="sd">        pesados.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">leaf_amount</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TreeParameters.setLeafSize"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters.setLeafSize">[documentos]</a>    <span class="k">def</span> <span class="nf">setLeafSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setea la escala del objeto hojas. </span>
+<span class="sd">        [0, inf]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">leaf_size</span><span class="o">=</span><span class="n">size</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TreeParameters.setLeafWeight"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters.setLeafWeight">[documentos]</a>    <span class="k">def</span> <span class="nf">setLeafWeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        De forma relativa, setea cuan perpediculares estan las hojas con</span>
+<span class="sd">        respecto al suelo. 1 Es paralelo, -1 es perpendicular.</span>
+<span class="sd">        Depende del sistema de coordenadas.</span>
+<span class="sd">        [-1, 1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">leaf_weight</span><span class="o">=</span><span class="n">weight</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TreeParameters.setPulseUpdate"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.TreeParameters.setPulseUpdate">[documentos]</a>    <span class="k">def</span> <span class="nf">setPulseUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        El comando update no funciona, por lo que hay que activar el autoupdate y desactivarlo.</span>
+<span class="sd">        Si queda activado, luego cuando se intentan borrar los objetos, el sistema se vuelve muy lento.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">auto_update</span><span class="o">=</span><span class="kc">False</span></div></div>
+
+
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.Tree">[documentos]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Junta todas las propiedades del arbol y agrega un diccionario para poder</span>
+<span class="sd">    llamar desde un yaml distintas funcionalidades. No todas estan</span>
+<span class="sd">    implementadas</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">=</span><span class="n">TreeParameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="o">=</span><span class="n">BranchNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trunk</span><span class="o">=</span><span class="n">TrunkNode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;seed&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">setSeed</span><span class="p">,</span>
+                <span class="s1">&#39;amountLeaf&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">setLeafAmount</span><span class="p">,</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">setName</span><span class="p">,</span>
+                <span class="s1">&#39;splitAngle&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="o">.</span><span class="n">setSplitAngle</span><span class="p">,</span>
+                <span class="s1">&#39;filepath&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">setFilePath</span>
+                <span class="p">}</span>
+
+<div class="viewcode-block" id="Tree.set"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.Tree.set">[documentos]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">argd</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A partir de un diccionario modifica todos los parametros del arbol de</span>
+<span class="sd">        forma generica.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">argu</span> <span class="ow">in</span> <span class="n">argd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fun</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">fun</span><span class="p">(</span><span class="n">argu</span><span class="p">)</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Tree.setName"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.Tree.setName">[documentos]</a>    <span class="k">def</span> <span class="nf">setName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;DefaultName&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Tree.setFilePath"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.Tree.setFilePath">[documentos]</a>    <span class="k">def</span> <span class="nf">setFilePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="o">=</span><span class="s1">&#39;/tmp/a.dae&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="o">=</span><span class="n">filepath</span></div>
+
+<div class="viewcode-block" id="Tree.setSeed"><a class="viewcode-back" href="../../../rst/code/modularTree.html#campo.scripts.modularTree.Tree.setSeed">[documentos]</a>    <span class="k">def</span> <span class="nf">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trunk</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span></div></div>
+        
+
+
+
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    
+    <span class="n">Config</span><span class="o">=</span><span class="n">TreeParameters</span><span class="p">()</span>
+    <span class="n">Config</span><span class="o">.</span><span class="n">setLeafAmount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span>
+
+<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

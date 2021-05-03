@@ -1,0 +1,19 @@
+.. _Slam Benchmark:
+
+Slam Benchmark
+====================
+
+En esta sección se explica como funciona el conjunto de herramientas relacionadas con el cálculo de los errores de los sistemas de localización y mapeo.
+
+Marco teórico
+------------------
+
+
+
+
+Quaterniones
+-------------------
+
+
+Cálculo de errores y odometría
+--------------------------------

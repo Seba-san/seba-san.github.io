@@ -1,0 +1,90 @@
+.. _Pioneer2dx:
+
+Pioneer2dx
+=====================
+Este package se encarga de todo lo relacionado con la simulación propiamente
+deicha. La simulación se hace mediante Gazebo usando sus motores fisicos y su motor
+gráfico (OGRE3). Sumado a que se utilizan modelos tridimencionales (.dae)
+generados con `Blender <https://www.blender.org/>`_ o con cualquier otro
+editor. 
+
+A modo ilustrativo, con SolidWorks se pueden generar los mismos modelos sumado
+a que se incorporan los momentos de intercia y otros parámetros que ayudan a
+realizar una simulación más fieldigna. 
+
+
+.. _model.xacro:
+    model
+
+.. _mod robot diferencial:
+
+Modelo del robot diferencial
+-------------------------------
+El modelo del robot implementado es del tipo diferencial, ya sea con 2 ruedas o
+con 4 pero en configuración diferencial. El modelo físico implementado
+corresponde al robot diferencial de 2 ruedas. Sin embargo es relativamente
+sencillo modificarlo desde el archivo xml :ref:`model.xacro`.
+
+Modelo matemático
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (:math:`a=0`), considerando la Figura XXX, el sistema resulta:
+
+.. math::
+
+    \dot{x}_c&=v_f \cos(\theta) -a \omega \sin (\theta) \\
+    \dot{y}_c&=v_f \sin(\theta) +a \omega \cos (\theta)\\
+    \dot{\theta}&=\omega
+
+además la relación entre las velocidades angulares de las ruedas y las señales de control :math:`v,\omega` resulta:
+
+.. math::
+
+    \omega_l&=v\frac{1}{r}+\omega\frac{b}{2r} \\
+    \omega_r&=v\frac{1}{r}-\omega\frac{b}{2r}
+
+siendo :math:`r` el radio de las ruedas (asumiendo que son iguales), :math:`b` es la distancia entre las ruedas y :math:`\omega_l,\omega_r` las velocidades angulares de la rueda izquierda y derecha respectivamente. 
+
+
+.. _differential controller:
+    scripts\.differential\_controller module
+
+.. _controladores:
+
+Controladores
+--------------
+La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir **hay seguimiento perfecto de las velocidades angulares**. Para publicar mensajes en el tipic del controlador, se puede hacer mediante la librería `differential controller`_. 
+
+Los comandos de la librería son:
+ * a : para :math:`\omega=\omega+0.01 rad/s`
+ * d : para :math:`\omega=\omega-0.01 rad/s`
+ * w : para :math:`v=v+0.1 m/s`
+ * s : para :math:`v=v-0.1 m/s`
+ * x : posiciona al vehículo en el :math:`[0,0,0]` del mapa.
+ * r : quita el modelo del mapa y lo vuelve a poner en el :math:`[0,0,0]`.
+ * q : (quit), sale del programa.
+ * c : Dá las acciones de control a lazo abierto para realizar un cuadrado.
+ * 8 : Dá las acciones de control a lazo abierto para realizar un :math:`8`.
+ * o : Dá las acciones de control a lazo abierto para realizar un :math:`o`.
+
+ En caso de que la trayectória sea parametrizable, se obtienen los valores de :math:`v,\omega` mediante cinemática inversa. 
+
+ Ejemplo de uso: .......................
+
+
+Odometría 
+-------------------------
+La odometría se calcula a partir de las señales de control. Se discretiza el sistema y se calculan los estados para cada instante de tiempo (:math:`t_s=100Hz`). El resultado de este calculo se publica en el tipic XXXX en formato de mensaje xxx. 
+
+Grountruth
+--------------
+Gracias a Gazebo, se puede conocer la pose (posición y orientación) y la cinématica del vehículo en todo instante de tiempo. Esto lo hace ideal para constrastar las metodologías bajo desarrollo. El resultado se publica en el tipic XXXX en formato de mensaje xxx.
+
+
+Launch files
+--------------
+Los launch files sirven para juntar todas las configuraciones en un solo archivo y lanzarlas con un solo comando (roslaunch).
+Ejemplo de uso: ..........................
+
+Dentro de estos launch files, estan los que *lanzan* todo el entorno de simulación y los que *enmascaran* un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar. 
+
+

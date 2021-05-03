@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pioneer2dx &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="next" title="Campo" href="campo.html" />
+    <link rel="prev" title="Dynamic World Documentación" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pioneer2dx">
+<span id="id1"></span><h1>Pioneer2dx<a class="headerlink" href="#pioneer2dx" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>Este package se encarga de todo lo relacionado con la simulación propiamente
+deicha. La simulación se hace mediante Gazebo usando sus motores fisicos y su motor
+gráfico (OGRE3). Sumado a que se utilizan modelos tridimencionales (.dae)
+generados con <a class="reference external" href="https://www.blender.org/">Blender</a> o con cualquier otro
+editor.</p>
+<p>A modo ilustrativo, con SolidWorks se pueden generar los mismos modelos sumado
+a que se incorporan los momentos de intercia y otros parámetros que ayudan a
+realizar una simulación más fieldigna.</p>
+<div class="section" id="modelo-del-robot-diferencial">
+<span id="mod-robot-diferencial"></span><h2>Modelo del robot diferencial<a class="headerlink" href="#modelo-del-robot-diferencial" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>El modelo del robot implementado es del tipo diferencial, ya sea con 2 ruedas o
+con 4 pero en configuración diferencial. El modelo físico implementado
+corresponde al robot diferencial de 2 ruedas. Sin embargo es relativamente
+sencillo modificarlo desde el archivo xml <a class="reference internal" href="model.html#model-xacro"><span class="std std-ref">Detalle sobre archivos XML (.xml, .xacro, .sdf)</span></a>.</p>
+<div class="section" id="modelo-matematico">
+<h3>Modelo matemático<a class="headerlink" href="#modelo-matematico" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (<img class="math" src="../_images/math/13dc89b7b31168910835c028abaec6fea6743145.png" alt="a=0"/>), considerando la Figura XXX, el sistema resulta:</p>
+<div class="math">
+<p><img src="../_images/math/9db768642305f08d3b451fa3dd77fe9981d9162d.png" alt="\dot{x}_c&amp;=v_f \cos(\theta) -a \omega \sin (\theta) \\
+\dot{y}_c&amp;=v_f \sin(\theta) +a \omega \cos (\theta)\\
+\dot{\theta}&amp;=\omega"/></p>
+</div><p>además la relación entre las velocidades angulares de las ruedas y las señales de control <img class="math" src="../_images/math/9df761281abed068fc8611401771efee17654148.png" alt="v,\omega"/> resulta:</p>
+<div class="math">
+<p><img src="../_images/math/7d9af070d8fcdc21a7508a8625bad358bb8ce687.png" alt="\omega_l&amp;=v\frac{1}{r}+\omega\frac{b}{2r} \\
+\omega_r&amp;=v\frac{1}{r}-\omega\frac{b}{2r}"/></p>
+</div><p>siendo <img class="math" src="../_images/math/79a3d439d28652c547386f39b555d90d3aaf102d.png" alt="r"/> el radio de las ruedas (asumiendo que son iguales), <img class="math" src="../_images/math/68c7c8c65602677ab56cf7fd88002023f0edc575.png" alt="b"/> es la distancia entre las ruedas y <img class="math" src="../_images/math/84f8a0f049b630ec05c1db8aecbccf160cba684b.png" alt="\omega_l,\omega_r"/> las velocidades angulares de la rueda izquierda y derecha respectivamente.</p>
+</div>
+</div>
+<div class="section" id="controladores">
+<span id="id2"></span><h2>Controladores<a class="headerlink" href="#controladores" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir <strong>hay seguimiento perfecto de las velocidades angulares</strong>. Para publicar mensajes en el tipic del controlador, se puede hacer mediante la librería <a class="reference external" href="scripts.differential_controllermodule">differential controller</a>.</p>
+<dl>
+<dt>Los comandos de la librería son:</dt><dd><ul class="simple">
+<li><p>a : para <img class="math" src="../_images/math/e52cd7f1eec2dc6e0e289a78c57993f93f7f0e24.png" alt="\omega=\omega+0.01 rad/s"/></p></li>
+<li><p>d : para <img class="math" src="../_images/math/daf53d9192c6b406cba993b4c431a4ca744830ee.png" alt="\omega=\omega-0.01 rad/s"/></p></li>
+<li><p>w : para <img class="math" src="../_images/math/4d3d9139da6a1a881bd3b0c5291e50d7a6fff839.png" alt="v=v+0.1 m/s"/></p></li>
+<li><p>s : para <img class="math" src="../_images/math/8e224c80dfe32cddf0812da7f9b56e035b14e43b.png" alt="v=v-0.1 m/s"/></p></li>
+<li><p>x : posiciona al vehículo en el <img class="math" src="../_images/math/dc895ec2bd6380cb07f0f5d723025eee92f7c09c.png" alt="[0,0,0]"/> del mapa.</p></li>
+<li><p>r : quita el modelo del mapa y lo vuelve a poner en el <img class="math" src="../_images/math/dc895ec2bd6380cb07f0f5d723025eee92f7c09c.png" alt="[0,0,0]"/>.</p></li>
+<li><p>q : (quit), sale del programa.</p></li>
+<li><p>c : Dá las acciones de control a lazo abierto para realizar un cuadrado.</p></li>
+<li><p>8 : Dá las acciones de control a lazo abierto para realizar un <img class="math" src="../_images/math/963219eafec84d240711eb594e2b8904b8883d82.png" alt="8"/>.</p></li>
+<li><p>o : Dá las acciones de control a lazo abierto para realizar un <img class="math" src="../_images/math/c99a3a8536ea2d9844720cdf27f57bde44bfe52c.png" alt="o"/>.</p></li>
+</ul>
+<p>En caso de que la trayectória sea parametrizable, se obtienen los valores de <img class="math" src="../_images/math/9df761281abed068fc8611401771efee17654148.png" alt="v,\omega"/> mediante cinemática inversa.</p>
+<p>Ejemplo de uso: …………………..</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="odometria">
+<h2>Odometría<a class="headerlink" href="#odometria" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>La odometría se calcula a partir de las señales de control. Se discretiza el sistema y se calculan los estados para cada instante de tiempo (<img class="math" src="../_images/math/537320b588da24e2fe58799df99e582c6219e17b.png" alt="t_s=100Hz"/>). El resultado de este calculo se publica en el tipic XXXX en formato de mensaje xxx.</p>
+</div>
+<div class="section" id="grountruth">
+<h2>Grountruth<a class="headerlink" href="#grountruth" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Gracias a Gazebo, se puede conocer la pose (posición y orientación) y la cinématica del vehículo en todo instante de tiempo. Esto lo hace ideal para constrastar las metodologías bajo desarrollo. El resultado se publica en el tipic XXXX en formato de mensaje xxx.</p>
+</div>
+<div class="section" id="launch-files">
+<h2>Launch files<a class="headerlink" href="#launch-files" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Los launch files sirven para juntar todas las configuraciones en un solo archivo y lanzarlas con un solo comando (roslaunch).
+Ejemplo de uso: ……………………..</p>
+<p>Dentro de estos launch files, estan los que <em>lanzan</em> todo el entorno de simulación y los que <em>enmascaran</em> un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pioneer2dx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modelo-del-robot-diferencial">Modelo del robot diferencial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#controladores">Controladores</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#odometria">Odometría</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grountruth">Grountruth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launch-files">Launch files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="capítulo anterior">Dynamic World Documentación</a></li>
+      <li>Next: <a href="campo.html" title="próximo capítulo">Campo</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/rst/pioneer2dx.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

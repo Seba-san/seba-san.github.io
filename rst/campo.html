@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campo &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="next" title="Slam Benchmark" href="sm_bk.html" />
+    <link rel="prev" title="Pioneer2dx" href="pioneer2dx.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="campo">
+<span id="id1"></span><h1>Campo<a class="headerlink" href="#campo" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>Este package engloba en conjunto de herramientas que permiten crear automaticamente entornos agrícolas. La comunicación entre programas es por medio de archivos .yaml estructurados de cierta manera. De manera ilustrativa se muestra un diagrama en bloques de todo el sistema, luego se describiran algunas partes relevantes.</p>
+<img alt="../_images/xml_actual.png" src="../_images/xml_actual.png" />
+<div class="section" id="interfaz-gragica-gui">
+<h2>Interfaz Grágica (GUI)<a class="headerlink" href="#interfaz-gragica-gui" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Mediante un archivo de creacion de la interfaz gráfica llamado GUI.py se puede estructura de forma básica la GUI. Para hacer uso de esta libreria hay que poner en la terminal</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python GUI.py
+</pre></div>
+</div>
+<p>En el siguiente video se explica como funciona todo el sistema:</p>
+<iframe width="600" height="338" src="https://www.youtube.com/embed/kd_I_F9Fkjk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><div class="admonition warning">
+<p class="admonition-title">Advertencia</p>
+<p>Tener en cuenta que los videos e imagenes mostradas pueden pertenecer a versiones anteriores, con lo cual no son 100% fieles a la version actual.</p>
+</div>
+</div>
+<div class="section" id="archivos-de-configuracion-yaml">
+<h2>Archivos de configuracion .yaml<a class="headerlink" href="#archivos-de-configuracion-yaml" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Los archivos de configuracion <em>.yaml</em> son archivos de texto plano con un formato particular y muy popular dentro de los scripts en python. Tiene la particularidad de que el contenido se puede leer generando un diccionario (de python). Por ejemplo un archivo de configuracion puede ser:</p>
+<div class="highlight-yaml notranslate" id="configmodel-yaml"><div class="highlight"><pre><span></span> <span class="nt">maleza</span><span class="p">:</span>
+     <span class="nt">pose_x</span><span class="p">:</span>
+         <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">normal</span>
+         <span class="nt">distributionConfig</span><span class="p">:</span>
+             <span class="nt">loc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">8</span>
+             <span class="nt">scale</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+             <span class="nt">val</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+     <span class="nt">pose_y</span><span class="p">:</span>
+         <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">normal</span>
+         <span class="nt">distributionConfig</span><span class="p">:</span>
+             <span class="nt">loc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">8</span>
+             <span class="nt">scale</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+             <span class="nt">val</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+     <span class="nt">pose_fi</span><span class="p">:</span>
+         <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">normal</span>
+         <span class="nt">distributionConfig</span><span class="p">:</span>
+             <span class="nt">loc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.5</span>
+             <span class="nt">scale</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+             <span class="nt">val</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+     <span class="nt">scale</span><span class="p">:</span>
+         <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">normal</span>
+         <span class="nt">distributionConfig</span><span class="p">:</span>
+             <span class="nt">loc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.07</span>
+             <span class="nt">scale</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.03</span>
+             <span class="nt">val</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+     <span class="nt">amount</span><span class="p">:</span>
+         <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">fix</span>
+         <span class="nt">distributionConfig</span><span class="p">:</span>
+             <span class="nt">loc</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7</span>
+             <span class="nt">scale</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">8</span>
+             <span class="nt">val</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="blender-y-modelos-dae">
+<h2>Blender y Modelos .dae<a class="headerlink" href="#blender-y-modelos-dae" title="Enlazar permanentemente con este título">¶</a></h2>
+<div class="section" id="modular-tree">
+<h3>Modular Tree<a class="headerlink" href="#modular-tree" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>La generación automática de árboles realistas se hace gracias a <span id="id2"><a class="reference internal" href="../index.html#id8">WP95</a></span>.</p>
+<p>Mediante la libreria <a class="reference external" href="https://github.com/MaximeHerpin/modular_tree/wiki">modular Tree</a> y a partir de los archivos base llamados <em>belnderAPI_V2.py</em> y <em>createTree.py</em> permite generar ciertas variaciones del mismo objeto.</p>
+<p>Actualmente este objeto en el archivo .blend debe estar seteado de determinada forma para que todo funcione bien, ya que el soft asume ciertas condiciones iniciales. El archivo actual que se esta usando se llama <em>script_realTree_v5.blend</em>.</p>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>commit 8153845fad4fc4c2a00b92f3caa98a0752641b97</p>
+<p>Este archivo debe contener un arbol base y modelo instanciado de las hojas se deve llamar «leaf», la estructura del arbol se debe llamar «tree» y además debe estar en la modalidad final (no en «preview»). El soft modifica el arbol tree, hace las instancias de las hojas reales, guarda el tronco y todas las hojas y luego borra todas las hojas.</p>
+</div>
+<dl class="simple">
+<dt>Alguna info relevante de como usar el addon en Blender:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/MaximeHerpin/modular_tree">Código fuente</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/UQx0eh8z-iM">Video explicativo</a></p></li>
+</ul>
+</dd>
+</dl>
+<p>A modo de observación, se creeó una libreria que sirve de capa intermedia para todas las configuraciones de <em>Modular Tree</em>.  Esta se llama <em>modularTree.py</em> y tiene implementadas todas las clases del AddOn. Sin embargo no esta todo implementado con respecto a los archivos de configuración. Para ver el código fuente revisar <a class="reference internal" href="code/modularTree.html#modulartree"><span class="std std-ref">modularTree</span></a></p>
+</div>
+</div>
+<div class="section" id="generacion-autimatica-de-xml">
+<h2>Generación autimática de xml<a class="headerlink" href="#generacion-autimatica-de-xml" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>La generación automática del mundo en xml es un poco compleja, por esto es necesario presentar el siguiente esquema:</p>
+<img alt="../_images/xml_actual.png" src="../_images/xml_actual.png" />
+<p>Donde <em>number.dae</em> son los archivos generados automáticamente y para diferenciarlos se les pone un numero que luego será el mismo número en el que aparece en la definición del entorno <em>dynamic_world.word</em> (es un archivo con formato xml).</p>
+</div>
+<div class="section" id="modificacion-de-un-xml-existente">
+<h2>Modificación de un xml existente<a class="headerlink" href="#modificacion-de-un-xml-existente" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>La idea de este conjunto de herramientas es tomar un mundo ya creado y sumarle cosas, como maleza o suelo. La estructura es similar a los visto antes en #generacion-autimatica-de-xml, con la diferencia de que los modelos no se modifican, solo se copian con distintas poses, escalas y cantiades.</p>
+<img alt="../_images/modify_world_diagram.png" src="../_images/modify_world_diagram.png" />
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Campo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#interfaz-gragica-gui">Interfaz Grágica (GUI)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#archivos-de-configuracion-yaml">Archivos de configuracion .yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#blender-y-modelos-dae">Blender y Modelos .dae</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generacion-autimatica-de-xml">Generación autimática de xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modificacion-de-un-xml-existente">Modificación de un xml existente</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pioneer2dx.html" title="capítulo anterior">Pioneer2dx</a></li>
+      <li>Next: <a href="sm_bk.html" title="próximo capítulo">Slam Benchmark</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/rst/campo.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

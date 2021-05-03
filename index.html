@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic World Documentación &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="Pioneer2dx" href="rst/pioneer2dx.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="dynamic-world-documentacion">
+<h1>Dynamic World Documentación<a class="headerlink" href="#dynamic-world-documentacion" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>Esta página es la documentación del conjunto de herramientas contenidas en <strong>Dynamic World</strong>.</p>
+<p><strong>Dynamic World</strong> es un conjunto de herramientas que permiten simular en  <a class="reference external" href="http://gazebosim.org/">Gazebo</a> un entorno agrícola (árboles con frutos). El objetivo principal es lograr testear y desarrollar herramientas aplicadas a la agricultura de precisión.</p>
+<p>En general está enfocado hacia aplicaciones de robótica, tales como navegación y reconstrucción espacial y temporal de un entorno semi estructurado. El desafío se encuentra en obtener robustez de los sistemas desarrollados sometiendolos a aspectos cambiantes del entorno, tales como distintos suelos, cambios significativos de vegetación (debido a cambio de estación, poda, cosecha, entre otros), malezas, obstáculos parciales o totales y desarrollo de sistemas redundantes.</p>
+<p>Este conjunto de herramientas esta separado en packages de ros.</p>
+<div class="section" id="modulos-desarrollados">
+<h2>Módulos desarrollados<a class="headerlink" href="#modulos-desarrollados" title="Enlazar permanentemente con este título">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="rst/pioneer2dx.html#pioneer2dx"><span class="std std-ref">Pioneer2dx</span></a></p></li>
+<li><p><a class="reference internal" href="rst/campo.html#campo"><span class="std std-ref">Campo</span></a></p></li>
+<li><p><a class="reference internal" href="rst/sm_bk.html#slam-benchmark"><span class="std std-ref">Slam Benchmark</span></a></p></li>
+<li><p><a class="reference internal" href="rst/icm_slam.html#icm-slam"><span class="std std-ref">ICM SLAM</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>A continuación se detallan cada uno de los módulos:</p>
+<div class="section" id="id1">
+<h3>Pioneer2dx<a class="headerlink" href="#id1" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Es un package de ros que contiene todo lo necesario para realizar la simulación, esto es:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Modelo del robot diferencial.</p></li>
+<li><p>Launch file para cada caso.</p></li>
+<li><p>El controlador del vehículo. Permite hacer trayectorias predefinidas o teleoperarlo.</p></li>
+<li><p>Configuracion de rviz.</p></li>
+<li><p>Publica, mediante ros, los datos de odometría basados en modelo y el groundtruth.</p></li>
+</ul>
+<p>Para más detalles visitar <a class="reference internal" href="rst/pioneer2dx.html#pioneer2dx"><span class="std std-ref">Pioneer2dx</span></a>.</p>
+</div></blockquote>
+</div>
+<div class="section" id="id2">
+<h3>Campo<a class="headerlink" href="#id2" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Este package se encarga de generar los archivos .world . Mediante archivos de configuracion .yaml o mediante GUI setea las caracteristicas del mapa. Se pueden agregar modelos de árboles, suelos, maleza, entre otros.</p>
+<p>Para más detalles visitar <a class="reference internal" href="rst/campo.html#campo"><span class="std std-ref">Campo</span></a>.</p>
+</div>
+<div class="section" id="id3">
+<h3>Slam Benchmark<a class="headerlink" href="#id3" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Este package lee los .bags generados y hace un análisis de los datos para luego otorgar datos estadísticos de los errores de translación y rotación.</p>
+<p>Para más detalles visitar <a class="reference internal" href="rst/sm_bk.html#slam-benchmark"><span class="std std-ref">Slam Benchmark</span></a>.</p>
+</div>
+<div class="section" id="id4">
+<h3>ICM SLAM<a class="headerlink" href="#id4" title="Enlazar permanentemente con este título">¶</a></h3>
+<p>Consiste en la implementación en ROS del ICM SLAM orientado a aplicaciones agrícolas. Para saber más sobre la fundamentación de este algoritmo revisar <span id="id5"><a class="reference internal" href="#id7">GAT+18</a></span>.</p>
+<p>Si se desea saber sobre su implementación en ros, visitar <a class="reference internal" href="rst/icm_slam.html#icm-slam"><span class="std std-ref">ICM SLAM</span></a>.</p>
+<p id="id6"><dl class="citation">
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id5">GAT+18</a></span></dt>
+<dd><p>J Gimenez, A Amicarelli, Juan Marcos Toibero, F Di Sciascio, and R Carelli. Iterated conditional modes to solve simultaneous localization and mapping in markov random fields context. <em>International Journal of Automation and Computing</em>, 15(3):310–324, 2018.</p>
+</dd>
+<dt class="label" id="id8"><span class="brackets">WP95</span></dt>
+<dd><p>Jason Weber and Joseph Penn. Creation and rendering of realistic trees. In <em>Proceedings of the 22nd annual conference on Computer graphics and interactive techniques</em>, 119–128. 1995.</p>
+</dd>
+</dl>
+</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/pioneer2dx.html">Pioneer2dx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/pioneer2dx.html#modelo-del-robot-diferencial">Modelo del robot diferencial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/pioneer2dx.html#controladores">Controladores</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/pioneer2dx.html#odometria">Odometría</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/pioneer2dx.html#grountruth">Grountruth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/pioneer2dx.html#launch-files">Launch files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/campo.html">Campo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/campo.html#interfaz-gragica-gui">Interfaz Grágica (GUI)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/campo.html#archivos-de-configuracion-yaml">Archivos de configuracion .yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/campo.html#blender-y-modelos-dae">Blender y Modelos .dae</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/campo.html#generacion-autimatica-de-xml">Generación autimática de xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/campo.html#modificacion-de-un-xml-existente">Modificación de un xml existente</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/sm_bk.html">Slam Benchmark</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/sm_bk.html#marco-teorico">Marco teórico</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/sm_bk.html#quaterniones">Quaterniones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/sm_bk.html#calculo-de-errores-y-odometria">Cálculo de errores y odometría</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/icm_slam.html">ICM SLAM</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="indices-y-tablas">
+<h1>Índices y Tablas<a class="headerlink" href="#indices-y-tablas" title="Enlazar permanentemente con este título">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="rst/pioneer2dx.html" title="próximo capítulo">Pioneer2dx</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

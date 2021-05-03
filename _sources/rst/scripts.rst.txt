@@ -1,0 +1,48 @@
+scripts package
+===============
+
+Submodules
+----------
+
+scripts\.control module
+-----------------------
+
+.. .. automodule:: scripts.control
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scripts\.controller\_node module
+--------------------------------
+
+.. .. automodule:: scripts.controller_node
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. _differential controller:
+
+scripts\.differential\_controller module
+----------------------------------------
+
+.. .. automodule:: scripts.differential_controller
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scripts\.groundtruth module
+---------------------------
+
+.. .. automodule:: scripts.groundtruth
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. .. automodule:: scripts
+    :members:
+    :undoc-members:
+    :show-inheritance:
