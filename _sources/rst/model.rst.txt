@@ -1,0 +1,18 @@
+.. _model.xacro:
+
+
+Detalle sobre archivos XML (.xml, .xacro, .sdf)
+================================================
+
+
+
+Modelo básico
+--------------
+
+Plugins
+----------
+
+Controllers
+-------------
+
+

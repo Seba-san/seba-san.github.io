@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>modularTree &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="modulartree">
+<span id="id1"></span><h1>modularTree<a class="headerlink" href="#modulartree" title="Enlazar permanentemente con este título">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="campo.scripts.modularTree.html#module-campo.scripts.modularTree" title="campo.scripts.modularTree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">campo.scripts.modularTree</span></code></a></p></td>
+<td><p>La idea de este programa es que sirva para anotar las caracteristicas de cada opcion «importante» en modularTree addon.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt id="campo.scripts.modularTree.TrunkNode">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">campo.scripts.modularTree.</span></code><code class="sig-name descname"><span class="pre">TrunkNode</span></code><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Tronco principal, este es el único objeto obligatorio
+Para mayor información acceder a la libreria en github o mediante blender.</p>
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TrunkNode.setEndRadius">
+<code class="sig-name descname"><span class="pre">setEndRadius</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode.setEndRadius"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode.setEndRadius" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Radio de la punta del tronco</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TrunkNode.setLength">
+<code class="sig-name descname"><span class="pre">setLength</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode.setLength"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode.setLength" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Altura del tronco principal, en metros?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TrunkNode.setRadius">
+<code class="sig-name descname"><span class="pre">setRadius</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode.setRadius"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode.setRadius" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Radio del tronco principal, en metros?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TrunkNode.setRandomness">
+<code class="sig-name descname"><span class="pre">setRandomness</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.11</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode.setRandomness"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode.setRandomness" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Segun la documentación: Determina que tan caotico se ve el tronco.
+(los olivos suelen ser muy caoticos)
+[0,0.5]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TrunkNode.setSeed">
+<code class="sig-name descname"><span class="pre">setSeed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TrunkNode.setSeed"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TrunkNode.setSeed" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Con los otros parametros iguales, genera cierta aleatoridad en la
+generacion del tronco</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="campo.scripts.modularTree.BranchNode">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">campo.scripts.modularTree.</span></code><code class="sig-name descname"><span class="pre">BranchNode</span></code><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Este nodo determina las caracteristicas de como se comportan las ramas
+Para mayor información acceder a la libreria en github o mediante blender.</p>
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.sefAdv">
+<code class="sig-name descname"><span class="pre">sefAdv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.sefAdv"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.sefAdv" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Habilita otras opciones. En este caso tiene el prefijo Adv
+True or False</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setAdvMaxSplitNumber">
+<code class="sig-name descname"><span class="pre">setAdvMaxSplitNumber</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setAdvMaxSplitNumber"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setAdvMaxSplitNumber" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>No se que hace.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setAmount">
+<code class="sig-name descname"><span class="pre">setAmount</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setAmount"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setAmount" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Cantidad de ramas, depende del espacio en el tronco principal, y de
+otras configs. No es exacto</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setCanSpawnLeaf">
+<code class="sig-name descname"><span class="pre">setCanSpawnLeaf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setCanSpawnLeaf"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setCanSpawnLeaf" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Permite o no que estas ramas tengan hojas. (Puede pasar que el trongo
+haga un split, en ese lugar es raro ver ramas.)
+False or True</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setFloorAvoidance">
+<code class="sig-name descname"><span class="pre">setFloorAvoidance</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setFloorAvoidance"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setFloorAvoidance" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>La rama mas baja, esta tan lejos del suelo como este parametro lo
+defina. Si por alguna otra config, las ramas estan todas arriba, este
+no le afecta.
+[0,+inf]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setGravityStrength">
+<code class="sig-name descname"><span class="pre">setGravityStrength</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setGravityStrength"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setGravityStrength" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Define que tanta fuerza hace la grabedad. El valor tipico es 0, pero
+puede ser -inf, +inf. Cuando es grande, simula que el arbol esta
+cargado, cuando es bajo hace que la mayoria de las puntas miren hacia
+arriba.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setLength">
+<code class="sig-name descname"><span class="pre">setLength</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setLength"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setLength" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Longitud de cada rama (en promedio) expresado en metros?.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setRadius">
+<code class="sig-name descname"><span class="pre">setRadius</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setRadius"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setRadius" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina el radio de las ramas como un porcentaje del radio del tronco
+principal
+[0,1] (va del 0% al 100%)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setSeed">
+<code class="sig-name descname"><span class="pre">setSeed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setSeed"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setSeed" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Con los otros parametros iguales, genera cierta aleatoridad en la
+generacion del tronco</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setSplitAngle">
+<code class="sig-name descname"><span class="pre">setSplitAngle</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setSplitAngle"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setSplitAngle" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Angulo con el que las ramas salen del tronco principal
+[0, 1.5]. 0 Es totalmente paralelas hacia arriba y 1.5 es perpendicular
+al tronco principal</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setSplitProba">
+<code class="sig-name descname"><span class="pre">setSplitProba</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setSplitProba"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setSplitProba" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina la probabilidad de que cada rama se vuelva a ramificar
+nuevamente (iterando sobre ella misma)
+[0,1]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.BranchNode.setStart">
+<code class="sig-name descname"><span class="pre">setStart</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#BranchNode.setStart"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.BranchNode.setStart" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina a partir de que altura salen las ramas. Esta expresado como
+porcentaje de la altura total del tronco principal
+[0,1]
+No chekeado</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="campo.scripts.modularTree.TwingNode">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">campo.scripts.modularTree.</span></code><code class="sig-name descname"><span class="pre">TwingNode</span></code><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TwingNode"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TwingNode" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Este nodo frabrica las hojas.
+Genera un ramillete de hojas con palo.
+Ver como incorporar las hojas realizadas ad-hoc.
+Por ahora sin implementar.
+Para mayor información acceder a la libreria en github o mediante blender.</p>
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TwingNode.setBranchNumber">
+<code class="sig-name descname"><span class="pre">setBranchNumber</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TwingNode.setBranchNumber"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TwingNode.setBranchNumber" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina la cantidad de hojas por ramillete. No es exacto.
+Es un numero entero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TwingNode.setLeafMaxRadius">
+<code class="sig-name descname"><span class="pre">setLeafMaxRadius</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TwingNode.setLeafMaxRadius"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TwingNode.setLeafMaxRadius" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>determina el radio maximo de la rama desde donde puede salir una hoja.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TwingNode.setLength">
+<code class="sig-name descname"><span class="pre">setLength</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TwingNode.setLength"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TwingNode.setLength" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina el largo del palo de cada hoja. 
+[0,inf]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TwingNode.setRadius">
+<code class="sig-name descname"><span class="pre">setRadius</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TwingNode.setRadius"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TwingNode.setRadius" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina el radio del palo de cada hoja.
+[0,inf]</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="campo.scripts.modularTree.TreeParameters">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">campo.scripts.modularTree.</span></code><code class="sig-name descname"><span class="pre">TreeParameters</span></code><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Para mayor información acceder a la libreria en github o mediante blender.</p>
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TreeParameters.createLeaf">
+<code class="sig-name descname"><span class="pre">createLeaf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters.createLeaf"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters.createLeaf" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Setea si se van a generar hojas o no
+False or True</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TreeParameters.setLeafAmount">
+<code class="sig-name descname"><span class="pre">setLeafAmount</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters.setLeafAmount"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters.setLeafAmount" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Determina la cantidad de hojas. Cuidado, esto genera modelos muy
+pesados.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TreeParameters.setLeafSize">
+<code class="sig-name descname"><span class="pre">setLeafSize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters.setLeafSize"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters.setLeafSize" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Setea la escala del objeto hojas. 
+[0, inf]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TreeParameters.setLeafWeight">
+<code class="sig-name descname"><span class="pre">setLeafWeight</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters.setLeafWeight"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters.setLeafWeight" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>De forma relativa, setea cuan perpediculares estan las hojas con
+respecto al suelo. 1 Es paralelo, -1 es perpendicular.
+Depende del sistema de coordenadas.
+[-1, 1]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.TreeParameters.setPulseUpdate">
+<code class="sig-name descname"><span class="pre">setPulseUpdate</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#TreeParameters.setPulseUpdate"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.TreeParameters.setPulseUpdate" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>El comando update no funciona, por lo que hay que activar el autoupdate y desactivarlo.
+Si queda activado, luego cuando se intentan borrar los objetos, el sistema se vuelve muy lento.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="campo.scripts.modularTree.Tree">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">campo.scripts.modularTree.</span></code><code class="sig-name descname"><span class="pre">Tree</span></code><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#Tree"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.Tree" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>Junta todas las propiedades del arbol y agrega un diccionario para poder
+llamar desde un yaml distintas funcionalidades. No todas estan
+implementadas</p>
+<dl class="py method">
+<dt id="campo.scripts.modularTree.Tree.set">
+<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#Tree.set"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.Tree.set" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd><p>A partir de un diccionario modifica todos los parametros del arbol de
+forma generica.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.Tree.setFilePath">
+<code class="sig-name descname"><span class="pre">setFilePath</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/tmp/a.dae'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#Tree.setFilePath"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.Tree.setFilePath" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.Tree.setName">
+<code class="sig-name descname"><span class="pre">setName</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DefaultName'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#Tree.setName"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.Tree.setName" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="campo.scripts.modularTree.Tree.setSeed">
+<code class="sig-name descname"><span class="pre">setSeed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/campo/scripts/modularTree.html#Tree.setSeed"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#campo.scripts.modularTree.Tree.setSeed" title="Enlazar permanentemente con esta definición">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/rst/code/modularTree.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

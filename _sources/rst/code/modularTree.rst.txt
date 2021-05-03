@@ -1,0 +1,43 @@
+.. _modularTree:
+
+modularTree
+=============
+
+.. autosummary::
+   :toctree:  _autosummary
+   :recursive:
+   
+   
+
+   campo.scripts.modularTree
+
+.. .. toctree::
+    
+
+    modularTree_code
+
+
+
+.. autoclass:: campo.scripts.modularTree.TrunkNode
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: campo.scripts.modularTree.BranchNode
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: campo.scripts.modularTree.TwingNode
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: campo.scripts.modularTree.TreeParameters
+    :members:
+    :undoc-members:
+
+.. autoclass:: campo.scripts.modularTree.Tree
+    :members:
+    :undoc-members:
+

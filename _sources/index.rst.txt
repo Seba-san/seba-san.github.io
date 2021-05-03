@@ -1,0 +1,96 @@
+.. Dynamic World documentation master file, created by
+   sphinx-quickstart on Thu Apr 29 03:47:52 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+.. _Pioneer2dx:
+    rst/pioneer2dx
+
+.. _Campo:
+    rst/campo
+
+.. _Slam Benchmark:
+    rst/sm_bk
+
+.. _ICM SLAM:
+    rst/icm_slam
+
+Dynamic World Documentación
+=========================================
+
+Esta página es la documentación del conjunto de herramientas contenidas en **Dynamic World**.
+
+**Dynamic World** es un conjunto de herramientas que permiten simular en  `Gazebo <http://gazebosim.org/>`_ un entorno agrícola (árboles con frutos). El objetivo principal es lograr testear y desarrollar herramientas aplicadas a la agricultura de precisión.
+
+En general está enfocado hacia aplicaciones de robótica, tales como navegación y reconstrucción espacial y temporal de un entorno semi estructurado. El desafío se encuentra en obtener robustez de los sistemas desarrollados sometiendolos a aspectos cambiantes del entorno, tales como distintos suelos, cambios significativos de vegetación (debido a cambio de estación, poda, cosecha, entre otros), malezas, obstáculos parciales o totales y desarrollo de sistemas redundantes.     
+
+Este conjunto de herramientas esta separado en packages de ros.
+
+
+Módulos desarrollados
+----------------------------
+ - :ref:`Pioneer2dx`
+ - :ref:`Campo`
+ - :ref:`Slam Benchmark`
+ - :ref:`ICM SLAM`
+
+A continuación se detallan cada uno de los módulos:
+
+Pioneer2dx
+***************
+Es un package de ros que contiene todo lo necesario para realizar la simulación, esto es:
+
+ - Modelo del robot diferencial.
+ - Launch file para cada caso.
+ - El controlador del vehículo. Permite hacer trayectorias predefinidas o teleoperarlo.
+ - Configuracion de rviz.
+ - Publica, mediante ros, los datos de odometría basados en modelo y el groundtruth.
+
+ Para más detalles visitar :ref:`Pioneer2dx`. 
+
+
+Campo
+*************
+Este package se encarga de generar los archivos .world . Mediante archivos de configuracion .yaml o mediante GUI setea las caracteristicas del mapa. Se pueden agregar modelos de árboles, suelos, maleza, entre otros. 
+
+Para más detalles visitar :ref:`Campo`. 
+
+Slam Benchmark
+***************
+Este package lee los .bags generados y hace un análisis de los datos para luego otorgar datos estadísticos de los errores de translación y rotación.  
+
+Para más detalles visitar :ref:`Slam Benchmark`.
+
+ICM SLAM
+*****************
+Consiste en la implementación en ROS del ICM SLAM orientado a aplicaciones agrícolas. Para saber más sobre la fundamentación de este algoritmo revisar :cite:label:`gimenez2018`.
+
+.. .. code-block:: none
+
+    Gimenez, J., et al. "Iterated conditional modes to solve simultaneous localization and mapping in Markov random fields context." International Journal of Automation and Computing 15.3 (2018): 310-324.
+
+Si se desea saber sobre su implementación en ros, visitar :ref:`ICM SLAM`.
+
+
+.. bibliography::
+    :cited:
+
+
+.. .. autosummary::
+   :toctree: _autosummary
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contenido:
+
+   rst/pioneer2dx
+   rst/campo
+   rst/sm_bk
+   rst/icm_slam
+
+Índices y Tablas
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
