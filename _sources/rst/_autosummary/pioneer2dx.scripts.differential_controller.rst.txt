@@ -1,0 +1,37 @@
+﻿pioneer2dx.scripts.differential\_controller
+===========================================
+
+.. automodule:: pioneer2dx.scripts.differential_controller
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      angular_difference
+      remaind
+      rotation
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ControlAction
+   
+   
+
+   
+   
+   
+
+
+

@@ -15,7 +15,7 @@
     <script src="../_static/translations.js"></script>
     <link rel="index" title="Índice" href="../genindex.html" />
     <link rel="search" title="Búsqueda" href="../search.html" />
-    <link rel="next" title="ICM SLAM" href="icm_slam.html" />
+    <link rel="next" title="slam_benchmark.scripts.test" href="_autosummary/slam_benchmark.scripts.test.html" />
     <link rel="prev" title="Campo" href="campo.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -38,12 +38,47 @@
 <p>En esta sección se explica como funciona el conjunto de herramientas relacionadas con el cálculo de los errores de los sistemas de localización y mapeo.</p>
 <div class="section" id="marco-teorico">
 <h2>Marco teórico<a class="headerlink" href="#marco-teorico" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>El problema de obtener una medida de que tan bueno es un sistema de SLAM fue abordado en <span id="id2"><a class="reference internal" href="../index.html#id10">GLU12</a>, <a class="reference internal" href="../index.html#id9">KummerleSD+09</a></span>.</p>
+<p>La forma de encararlo es calcular separadamente los errores de translación y los de rotación. Cada uno con su propia métrica.</p>
+<p>La clave está en obtener la rotación y la traslación <em>relativa</em> entre instantes de tiempo. Es decir, dados los instantes de tiempo <em>k</em> y <em>k+1</em>, cuyas translaciones y rotaciones son <img class="math" src="../_images/math/57b035aa8f1a224a558875ea71986ab5131dd361.png" alt="T_k,T_{k+1}, R_k,R_{k+1}"/>. Luego la rotación y translación relativas son <img class="math" src="../_images/math/3877333efe8168ef5c33de6ea14ca8bec02aee1e.png" alt="T_r=T_k-T_{k+1}"/> y <img class="math" src="../_images/math/461daf71054dee2193607cc90e99544066684c47.png" alt="R_r=R_kR_{k+1}^{-1}"/>. Entonces el error en ese instante de tiempo se calcula como <img class="math" src="../_images/math/f0ae1d6fd732edebf362cb2efbaf226286fdd73c.png" alt="E_R=||R_r-R_{gt}||"/> y <img class="math" src="../_images/math/7547134b0c96917a34eb6bd0971f761127ad3007.png" alt="E_t=||T_r-T_{gt}||"/>, siendo <img class="math" src="../_images/math/46001c54c0834df974bb4b68ea8a8fd4598a5428.png" alt="R_{gt}, T_{gt}"/> la rotación y la translación relativa del <em>GrounTruth</em>.</p>
+<p>Para mas detalles revisar <span id="id3"><a class="reference internal" href="../index.html#id10">GLU12</a>, <a class="reference internal" href="../index.html#id9">KummerleSD+09</a>, <a class="reference internal" href="../index.html#id11">LM97</a></span>.</p>
 </div>
 <div class="section" id="quaterniones">
 <h2>Quaterniones<a class="headerlink" href="#quaterniones" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Usualmente operar con translaciónes en sistemas cartecianos? no genera mayor dificultad. Sin embargo no pasa lo mismo con las rotaciones. Existen varias formas de describir la orientación de un objeto en el espacio y por lo tanto se dificulta calcular una métrica en este ámbito sumado a que aparecen <em>discontinuidades</em>. Si se quiere profundizar mas en este tema visitar <a class="reference external" href="https://en.wikipedia.org/wiki/Euler_angles">Wikipedia - Euler angles</a> .</p>
+<p>Como solución a estos problemas se puede usar la toria desarrollada por <em>Hamilton</em>, ver <a class="reference external" href="https://en.wikipedia.org/wiki/Quaternion">Wikipedia - Quaternions</a>. Si bien resuelve el problema de las ambiguedades y de las discontinuidades, esta forma de representar la orientación es relativamente más complejo que los antes mencionados. Por este motivo es necesario profundizar en su aprendizaje. Se recomienda ampliamente revisar los siguientes enlaces:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://eater.net/quaternions">Visualizing quaternions</a> : Es un conjunto de videos explicativos sumado a un gran software que permite jugar lo suficiente para comprender el funcionamiento.</p></li>
+<li><p>Taller de quaterniones brindado por Dr. Javier Gimenez (ver).</p></li>
+<li><p>Libreria de quaterniones del INAUT.</p></li>
+</ul>
+</div></blockquote>
+<p>Asumiendo que los anteriores conceptos ya están asimilados, ahora resulta de interés determinar cual es la métrica más adecuada para calcular los errores en las orientaciones. Este problema fue abordado en <span id="id4"><a class="reference internal" href="../index.html#id12">Huy09</a></span>. En este trabajo se implementó la metrica <img class="math" src="../_images/math/ed5831b0b23526fa04e62ab6be29d901f99459cc.png" alt="\Phi_3"/> dada por:</p>
+<div class="math">
+<p><img src="../_images/math/81bb1120e87fe7c93a5c3bb3b2be9dfcb62b2423.png" alt="\Phi_3: S^3 \times S^3 \rightarrow \mathbb{R}^+ \\
+\Phi_3(q_1,q_2)=\arccos (\vert q_1 \cdot q_2 \vert)"/></p>
+</div><p>La elección de esta métrica se basa en que pondera por igual a todas las distancias. Tiene una respuesta lineal?</p>
 </div>
 <div class="section" id="calculo-de-errores-y-odometria">
 <h2>Cálculo de errores y odometría<a class="headerlink" href="#calculo-de-errores-y-odometria" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Teniendo en cuenta los anteriores contenidos, solo resta explicar las características del software desarrollado.</p>
+<p>La forma de analizar los datos generados con el simulador es mediante los archivos <em>.bag</em> generados gracias a ROS. Inicialmente la librería filtra el .bag y almacena solo aquellos topics de interés en un archivo <em>.csv</em>. Esto se realiza de esa manera ya que el filtrado inicial tarda un tiempo significativo y que además este tiempo depende de la cantidad de datos.</p>
+<p>En una segunda iteración, la librería lee el archivo CSV y lo manipula con la libreria <a class="reference external" href="https://pandas.pydata.org/docs/user_guide/index.html#user-guide">Pandas</a>  mediante el uso de <em>DataFrames</em>. Luego se vuelven a filtrar los datos para seleccionar aquellos <em>timestamp</em> que esten cerca de los datos generados por el sistema de SLAM. Una vez que ya se tienen las mediciones matcheadas temporalmente hablando se procede al cálculo de los errores relativos con la metodología antes mencionada.</p>
+<div class="section" id="software">
+<h3>Software<a class="headerlink" href="#software" title="Enlazar permanentemente con este título">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/slam_benchmark.scripts.test.html#module-slam_benchmark.scripts.test" title="slam_benchmark.scripts.test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slam_benchmark.scripts.test</span></code></a></p></td>
+<td><p>Este codigo hace 2 cosas:  .- Lee los .bag y genera un .csv .- Calcula y grafica los errores de la estimacion</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 
@@ -82,7 +117,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="campo.html" title="capítulo anterior">Campo</a></li>
-      <li>Next: <a href="icm_slam.html" title="próximo capítulo">ICM SLAM</a></li>
+      <li>Next: <a href="_autosummary/slam_benchmark.scripts.test.html" title="próximo capítulo">slam_benchmark.scripts.test</a></li>
   </ul></li>
 </ul>
 </div>

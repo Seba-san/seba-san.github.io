@@ -13,6 +13,10 @@ a que se incorporan los momentos de intercia y otros parámetros que ayudan a
 realizar una simulación más fieldigna. 
 
 
+.. image:: pioneer2dx.png
+    :align: center
+    :width: 300
+
 .. _model.xacro:
     model
 
@@ -27,7 +31,12 @@ sencillo modificarlo desde el archivo xml :ref:`model.xacro`.
 
 Modelo matemático
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (:math:`a=0`), considerando la Figura XXX, el sistema resulta:
+
+.. image:: model.png
+    :align: center
+    :width: 300
+
+Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (:math:`a=0`), considerando la figura anterior, el sistema resulta:
 
 .. math::
 
@@ -52,7 +61,14 @@ siendo :math:`r` el radio de las ruedas (asumiendo que son iguales), :math:`b` e
 
 Controladores
 --------------
-La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir **hay seguimiento perfecto de las velocidades angulares**. Para publicar mensajes en el tipic del controlador, se puede hacer mediante la librería `differential controller`_. 
+La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir **hay seguimiento perfecto de las velocidades angulares**. Para publicar mensajes en el topic del controlador, se puede hacer mediante la librería
+
+
+.. autosummary::
+   :toctree:  _autosummary
+   :recursive:
+
+    pioneer2dx.scripts.differential_controller
 
 Los comandos de la librería son:
  * a : para :math:`\omega=\omega+0.01 rad/s`

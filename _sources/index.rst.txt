@@ -71,6 +71,8 @@ Consiste en la implementación en ROS del ICM SLAM orientado a aplicaciones agr�
 
 Si se desea saber sobre su implementación en ros, visitar :ref:`ICM SLAM`.
 
+Referencias
+*************
 
 .. bibliography::
     :cited:

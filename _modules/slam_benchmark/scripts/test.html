@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>slam_benchmark.scripts.test &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para slam_benchmark.scripts.test</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Este codigo hace 2 cosas: </span>
+<span class="sd">.- Lee los .bag y genera un .csv</span>
+<span class="sd">.- Calcula y grafica los errores de la estimacion</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">rosbag</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">bagpy</span>
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Pose</span><span class="p">,</span> <span class="n">PoseStamped</span><span class="p">,</span> <span class="n">TransformStamped</span>
+<span class="kn">from</span> <span class="nn">tf2_msgs.msg</span> <span class="kn">import</span> <span class="n">TFMessage</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1">#import plotly.graph_objects as go</span>
+<span class="c1">#from bokeh.plotting import figure, show</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">pyquaternionIO</span> <span class="kn">import</span> <span class="n">Quaternion</span>
+<span class="c1">#import tf</span>
+
+<span class="k">def</span> <span class="nf">view_info</span><span class="p">(</span><span class="n">msgg</span><span class="o">=</span><span class="n">TransformStamped</span><span class="p">()):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## header: &#39;</span><span class="p">,</span> <span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;## child: &#39;</span><span class="p">,</span> <span class="n">msgg</span><span class="o">.</span><span class="n">child_frame_id</span><span class="p">)</span>
+    <span class="c1">#print(&#39;## test: &#39;,msgg.header)</span>
+    <span class="n">s</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span><span class="o">.</span><span class="n">secs</span>
+    <span class="n">nd</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span><span class="o">.</span><span class="n">nsecs</span>
+    <span class="n">t</span><span class="o">=</span><span class="n">s</span><span class="o">+</span><span class="n">nd</span><span class="o">*</span><span class="mf">1e-9</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#### Timestamp: </span><span class="si">%10.6f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">translation</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translation</span>
+    <span class="n">T</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">translation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">translation</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">translation</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;## np array translate: &quot;</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+    <span class="n">rotation</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotation</span>
+    <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rotation</span><span class="o">.</span><span class="n">w</span><span class="p">,</span><span class="n">rotation</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">rotation</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">rotation</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;## np array rotation: &quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BagConfig</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="c1">#base=&#39;/home/seba/Respaldo/Doctorado/investigacion/simulacion/ws/src/slam_benchmark/bags/&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="n">frame_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic_find</span><span class="o">=</span><span class="n">topic_find</span>
+
+    <span class="k">def</span> <span class="nf">is_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">topic</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_find</span><span class="o">==</span><span class="n">topic</span><span class="p">:</span>
+            <span class="n">msgg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_msg</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    
+            <span class="n">frame</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">frame_id</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_id</span><span class="o">==</span><span class="n">frame</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">class</span> <span class="nc">BagTf</span><span class="p">(</span><span class="n">BagConfig</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">BagConfig</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="p">,</span><span class="n">frame_id</span><span class="p">,</span><span class="n">topic_find</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">get_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dependiendo del tipo de mensaje se acomoda para que pueda ser leido de</span>
+<span class="sd">        la misma forma.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="o">.</span><span class="n">transforms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_T_R</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msgg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtiene T y R en formato np array del mensaje</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fun</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translation</span>
+        <span class="n">T</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fun</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+        <span class="n">fun</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rotation</span>
+        <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fun</span><span class="o">.</span><span class="n">w</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">T</span><span class="p">,</span><span class="n">R</span>
+
+  
+<span class="k">class</span> <span class="nc">BagPose</span><span class="p">(</span><span class="n">BagConfig</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">BagConfig</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="p">,</span><span class="n">frame_id</span><span class="p">,</span><span class="n">topic_find</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dependiendo del tipo de mensaje se acomoda para que pueda ser leido de</span>
+<span class="sd">        la misma forma.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">get_T_R</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msgg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtiene T y R en formato np array del mensaje</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fun</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">T</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fun</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+        <span class="n">fun</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">orientation</span>
+        <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fun</span><span class="o">.</span><span class="n">w</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">fun</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">T</span><span class="p">,</span><span class="n">R</span>
+
+
+        
+    
+
+
+<div class="viewcode-block" id="get_df"><a class="viewcode-back" href="../../../rst/sm_bk.html#slam_benchmark.scripts.test.get_df">[documentos]</a><span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="n">bag_config</span> <span class="o">=</span> <span class="n">BagConfig</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Esta funcion lee un bag y genera un dataframe del topic que se busca</span>
+<span class="sd">    almacenar. Si se requieren varios topics, se puede llamar varias veces. Es</span>
+<span class="sd">    media ineficiente en el uso de los recursos, pero este calculo se realiza</span>
+<span class="sd">    offline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#bag_config=BagConfig()</span>
+    <span class="n">bag_loaded</span><span class="o">=</span><span class="n">rosbag</span><span class="o">.</span><span class="n">Bag</span><span class="p">(</span><span class="n">bag_config</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="c1">#msgg=TransformStamped()</span>
+    <span class="c1">#header=[&#39;TimeStamp&#39;,&#39;tx&#39;,&#39;ty&#39;,&#39;tz&#39;,&#39;rw&#39;,&#39;rx&#39;,&#39;ry&#39;,&#39;rz&#39;]</span>
+    <span class="c1">#header=[&#39;TimeStamp&#39;,&#39;T&#39;,&#39;R&#39;,&#39;seq&#39;]</span>
+    <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">,</span><span class="s1">&#39;T&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">]</span>
+    <span class="n">D</span><span class="o">=</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+        <span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+
+    <span class="n">count</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">t2</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">topic</span><span class="p">,</span><span class="n">msg</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">bag_loaded</span><span class="o">.</span><span class="n">read_messages</span><span class="p">():</span>
+        <span class="c1"># Quizas se puede hacelerar este bucle buscando aquellos topics</span>
+        <span class="c1"># necesitados.</span>
+        <span class="k">if</span> <span class="n">bag_config</span><span class="o">.</span><span class="n">is_msg</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+            <span class="n">msgg</span><span class="o">=</span><span class="n">bag_config</span><span class="o">.</span><span class="n">get_msg</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span><span class="o">.</span><span class="n">secs</span>
+            <span class="n">nd</span><span class="o">=</span><span class="n">msgg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span><span class="o">.</span><span class="n">nsecs</span>
+            <span class="c1">#t=s+nd*1e-9</span>
+            <span class="n">t</span><span class="o">=</span><span class="n">s</span><span class="o">*</span><span class="mf">1e9</span><span class="o">+</span><span class="n">nd</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">!=</span><span class="n">t2</span><span class="p">:</span>
+                <span class="n">t2</span><span class="o">=</span><span class="n">t</span>
+                <span class="n">T</span><span class="p">,</span><span class="n">R</span><span class="o">=</span><span class="n">bag_config</span><span class="o">.</span><span class="n">get_T_R</span><span class="p">(</span><span class="n">msgg</span><span class="p">)</span>
+                <span class="n">D</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">D</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+                <span class="c1">#count +=1</span>
+                <span class="c1">#if count==10:</span>
+                <span class="c1">#    break</span>
+             
+    <span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="c1">#print(data)</span>
+    <span class="n">bag_loaded</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="c1">#data.to_csv(&#39;test.csv&#39;)</span>
+    <span class="c1">#data.to_pickle(&#39;test.pkl&#39;)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+<span class="k">def</span> <span class="nf">save_csvs</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generando los .csv ...&#39;</span><span class="p">)</span>
+    <span class="n">header_path</span><span class="o">=</span><span class="s1">&#39;/home/seba/Respaldo/Doctorado/investigacion/simulacion/ws/src/slam_benchmark/bags/&#39;</span>
+    <span class="n">filename</span><span class="o">=</span><span class="n">header_path</span><span class="o">+</span><span class="s1">&#39;laser_data.bag&#39;</span>
+    <span class="n">bag</span><span class="o">=</span><span class="n">BagPose</span><span class="p">()</span>
+    <span class="c1"># Config para gt</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">filename</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;world&#39;</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;/pioneer2dx/ground_truth/pose&#39;</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">get_df</span><span class="p">(</span><span class="n">bag</span><span class="p">)</span>
+    <span class="n">gt</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/pose_gt.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ground truth generado.&#39;</span><span class="p">)</span>
+    <span class="c1"># Config odometria</span>
+    <span class="n">bag</span><span class="o">=</span><span class="n">BagTf</span><span class="p">()</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;odom_groundtruth&#39;</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">filename</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;/tf&#39;</span>
+    <span class="n">odo</span><span class="o">=</span><span class="n">get_df</span><span class="p">(</span><span class="n">bag</span><span class="p">)</span>
+    <span class="n">odo</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/odo.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Odometria generada.&#39;</span><span class="p">)</span>
+    <span class="c1"># Config para slam</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">header_path</span><span class="o">+</span><span class="s1">&#39;mapper_data.bag&#39;</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;map&#39;</span>
+    <span class="n">slam</span><span class="o">=</span><span class="n">get_df</span><span class="p">(</span><span class="n">bag</span><span class="p">)</span>
+    <span class="n">slam</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/slam.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;datos SLAM generados.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Prepocesamiento realizado&#39;</span><span class="p">)</span>
+
+    <span class="c1">#return gt,slam,pose</span>
+
+<span class="k">def</span> <span class="nf">save_csvs_odom</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generando los .csv con solamente odometria...&#39;</span><span class="p">)</span>
+    <span class="n">header_path</span><span class="o">=</span><span class="s1">&#39;/home/seba/Respaldo/Doctorado/investigacion/simulacion/ws/src/slam_benchmark/bags/&#39;</span>
+    <span class="n">filename</span><span class="o">=</span><span class="n">header_path</span><span class="o">+</span><span class="s1">&#39;laser_data.bag&#39;</span>
+    <span class="n">bag</span><span class="o">=</span><span class="n">BagPose</span><span class="p">()</span>
+    <span class="c1"># Config para gt</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">filename</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;world&#39;</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;/pioneer2dx/ground_truth/pose&#39;</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">get_df</span><span class="p">(</span><span class="n">bag</span><span class="p">)</span>
+    <span class="n">gt</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/pose_gt.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ground truth generado.&#39;</span><span class="p">)</span>
+    <span class="c1"># Config odometria</span>
+    <span class="n">bag</span><span class="o">=</span><span class="n">BagTf</span><span class="p">()</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">frame_id</span><span class="o">=</span><span class="s1">&#39;odom_groundtruth&#39;</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">filepath</span><span class="o">=</span><span class="n">filename</span>
+    <span class="n">bag</span><span class="o">.</span><span class="n">topic_find</span><span class="o">=</span><span class="s1">&#39;/tf&#39;</span>
+    <span class="n">odo</span><span class="o">=</span><span class="n">get_df</span><span class="p">(</span><span class="n">bag</span><span class="p">)</span>
+    <span class="n">odo</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/odo.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Odometria generada.&#39;</span><span class="p">)</span>
+    <span class="c1"># Config para slam</span>
+    <span class="n">slam</span><span class="o">=</span><span class="n">override_dataframe</span><span class="p">(</span><span class="n">odo</span><span class="p">)</span>
+    <span class="n">slam</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tmp/slam.csv&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;datos SLAM adulterados generados.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Prepocesamiento realizado&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">override_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">D</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">:[],</span><span class="s1">&#39;T&#39;</span><span class="p">:[],</span><span class="s1">&#39;R&#39;</span><span class="p">:[]}</span>
+    <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="n">T</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]):</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+
+<div class="viewcode-block" id="load_csvs"><a class="viewcode-back" href="../../../rst/sm_bk.html#slam_benchmark.scripts.test.load_csvs">[documentos]</a><span class="k">def</span> <span class="nf">load_csvs</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    carga en la ram los dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odo</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;tmp/odo.csv&#39;</span><span class="p">)</span>
+    <span class="n">slam</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;tmp/slam.csv&#39;</span><span class="p">)</span>
+    <span class="n">pose</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;tmp/pose_gt.csv&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">pose</span></div>
+
+<div class="viewcode-block" id="get_index"><a class="viewcode-back" href="../../../rst/sm_bk.html#slam_benchmark.scripts.test.get_index">[documentos]</a><span class="k">def</span> <span class="nf">get_index</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera un nuevo dataframe dandole el formato adecuado a cada variable </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ind</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">D</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">:[],</span><span class="s1">&#39;T&#39;</span><span class="p">:[],</span><span class="s1">&#39;R&#39;</span><span class="p">:[]}</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">slam</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]:</span>
+        <span class="n">i</span><span class="o">=</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str2array</span><span class="p">(</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Quaternion</span><span class="p">(</span><span class="n">str2array</span><span class="p">(</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1">#ind.append(i)</span>
+    
+    <span class="c1">#return ind</span>
+    <span class="c1">#gt=gt.iloc[ind]</span>
+    <span class="c1">#return gt</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">D</span><span class="p">)</span> </div>
+
+<span class="k">def</span> <span class="nf">str2array</span><span class="p">(</span><span class="n">txt</span><span class="o">=</span><span class="s1">&#39;[a a]&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">txt</span>
+
+    <span class="n">txt</span><span class="o">=</span><span class="n">txt</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#txt=txt.split()</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)])</span><span class="c1"># Is for convert to a matrix</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">T</span>
+
+<div class="viewcode-block" id="euler_from_quaternion"><a class="viewcode-back" href="../../../rst/sm_bk.html#slam_benchmark.scripts.test.euler_from_quaternion">[documentos]</a><span class="k">def</span> <span class="nf">euler_from_quaternion</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a quaternion into euler angles (roll, pitch, yaw)</span>
+<span class="sd">        roll is rotation around x in radians (counterclockwise)</span>
+<span class="sd">        pitch is rotation around y in radians (counterclockwise)</span>
+<span class="sd">        yaw is rotation around z in radians (counterclockwise)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">w</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="o">+</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="o">+</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">roll_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+     
+        <span class="n">t2</span> <span class="o">=</span> <span class="o">+</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="n">z</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="o">+</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">t2</span> <span class="o">&gt;</span> <span class="o">+</span><span class="mf">1.0</span> <span class="k">else</span> <span class="n">t2</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">t2</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">else</span> <span class="n">t2</span>
+        <span class="n">pitch_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span>
+     
+        <span class="n">t3</span> <span class="o">=</span> <span class="o">+</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">z</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">t4</span> <span class="o">=</span> <span class="o">+</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">yaw_z</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">t3</span><span class="p">,</span> <span class="n">t4</span><span class="p">)</span>
+     
+        <span class="k">return</span> <span class="n">roll_x</span><span class="p">,</span> <span class="n">pitch_y</span><span class="p">,</span> <span class="n">yaw_z</span> <span class="c1"># in radians</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">quaternion2euler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+    <span class="n">R</span><span class="o">=</span><span class="n">str2array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">rpy</span><span class="o">=</span><span class="n">euler_from_quaternion</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">rpy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">rpy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">rpy</span><span class="p">[</span><span class="mi">2</span><span class="p">]]])</span><span class="o">.</span><span class="n">T</span> 
+
+<div class="viewcode-block" id="err_indx"><a class="viewcode-back" href="../../../rst/sm_bk.html#slam_benchmark.scripts.test.err_indx">[documentos]</a><span class="k">def</span> <span class="nf">err_indx</span><span class="p">(</span><span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcula el error entre el groundtruth (gt) y las otras estimaciones.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">T_s0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">T_gt0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">R_s0</span><span class="o">=</span><span class="n">Quaternion</span><span class="p">()</span>
+    <span class="n">R_gt0</span><span class="o">=</span><span class="n">Quaternion</span><span class="p">()</span>
+    <span class="n">D</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">:[],</span><span class="s1">&#39;errorT&#39;</span><span class="p">:[],</span><span class="s1">&#39;errorR&#39;</span><span class="p">:[]}</span>
+    <span class="c1">#slam_d={&#39;TimeStamp&#39;:[],&#39;T&#39;:[],&#39;R&#39;:[]}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slam</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]):</span>
+        <span class="n">T_s</span><span class="o">=</span><span class="n">str2array</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">T_odo</span><span class="o">=</span><span class="n">str2array</span><span class="p">(</span><span class="n">odo</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">T_gt</span><span class="o">=</span><span class="n">str2array</span><span class="p">(</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># for Gmapping and hector</span>
+        <span class="n">T_s</span><span class="o">+=</span><span class="n">T_odo</span>
+        <span class="n">slam</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">T_s</span>
+        <span class="c1">#gt[&#39;T&#39;][i]=T_gt</span>
+        <span class="n">e_t</span><span class="o">=</span><span class="p">(</span><span class="n">T_s</span><span class="o">-</span><span class="n">T_s0</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="n">T_gt</span><span class="o">-</span><span class="n">T_gt0</span><span class="p">)</span>
+        <span class="c1">#e=Ts # ojo, revisar esto</span>
+        <span class="n">e_t</span><span class="o">=</span><span class="n">e_t</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">e_t</span><span class="p">)</span> <span class="c1"># warning</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;errorT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_t</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1">#slam_d[&#39;T&#39;].append(T_s)</span>
+
+        <span class="c1">#slam.replace({&#39;T&#39;:i},T_s)</span>
+        <span class="c1">#pose.replace({&#39;T&#39;:i},T_gt)</span>
+
+        <span class="c1">#pose[&#39;T&#39;].replace(i,T_gt)</span>
+
+        <span class="n">R_s</span><span class="o">=</span><span class="n">slam</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> 
+        <span class="n">R_odo</span><span class="o">=</span><span class="n">odo</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#R_odo=Quaternion(odo[&#39;R&#39;].iloc[i] )</span>
+        <span class="n">R_gt</span><span class="o">=</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(R_odo.q)</span>
+        <span class="n">R_s</span><span class="o">=</span><span class="n">R_s</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">R_odo</span><span class="p">)</span>
+        <span class="n">slam</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">R_s</span>
+        
+        
+        <span class="n">a</span><span class="o">=</span><span class="n">R_s</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">R_s0</span><span class="o">.</span><span class="n">inverse</span><span class="p">())</span>
+        <span class="n">b</span><span class="o">=</span><span class="n">R_gt</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">R_gt0</span><span class="o">.</span><span class="n">inverse</span><span class="p">())</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        c=a.cross(b.inverse())</span>
+<span class="sd">        c.q[0]=0</span>
+<span class="sd">        c=Quaternion(c.q,unitary=False)</span>
+<span class="sd">        e_r=c.norm()</span>
+<span class="sd">        e_r=math.asin(e_r) # Es lineal y esta entre [0,pi/2]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">e_r</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">inner_product</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span>
+        <span class="c1">#e_r=(R_s.cross(R_s0.conj()))-(R_gt-R_gt0)</span>
+        <span class="c1">#e_r=e_r.T.cross(e_r) # warning</span>
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;errorR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_r</span><span class="p">)</span>
+
+        <span class="n">D</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slam</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">T_s0</span><span class="o">=</span><span class="n">T_s</span>
+        <span class="n">T_gt0</span><span class="o">=</span><span class="n">T_gt</span>
+        <span class="n">R_s0</span><span class="o">=</span><span class="n">R_s</span>
+        <span class="n">R_gt0</span><span class="o">=</span><span class="n">R_gt</span>
+
+
+
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        count+=1</span>
+<span class="sd">        if count==20:</span>
+<span class="sd">            break</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">errDF</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error en T total: &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error en R total: &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">errDF</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span></div>
+
+<span class="k">def</span> <span class="nf">plotting</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">errDF</span><span class="p">):</span>
+
+    <span class="n">x_gt</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">y_gt</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">x_s</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">y_s</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">slam</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]):</span>
+        <span class="c1">#T=str2array(T)</span>
+        <span class="n">x_s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y_s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1">#x_s.append(slam[&#39;T&#39;].iloc[i][0,0])</span>
+        <span class="c1">#y_s.append(slam[&#39;T&#39;].iloc[i][1,0])</span>
+        <span class="c1">#T2=str2array(gt[&#39;T&#39;].iloc[i])</span>
+        <span class="n">T2</span><span class="o">=</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#print(T2)</span>
+        <span class="c1">#print(&#39;Tipo: &#39;, type(T2))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">T2</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;slam: &#39;</span><span class="p">,</span> <span class="n">slam</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;gt: &#39;</span><span class="p">,</span><span class="n">gt</span><span class="p">[</span><span class="s1">&#39;TimeStamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            
+            <span class="c1">#print(i)</span>
+            <span class="n">T2</span><span class="o">=</span><span class="n">str2array</span><span class="p">(</span><span class="n">T2</span><span class="p">)</span>
+
+        <span class="c1">#print(i)</span>
+        <span class="c1">#print(T2,&#39;tipo &#39;,type(T2))</span>
+        <span class="n">x_gt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y_gt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+   
+        <span class="c1">#x_s[-1]+=x_gt[-1]</span>
+        <span class="c1">#y_s[-1]+=y_gt[-1]</span>
+
+    
+    <span class="c1"># Source:https://plotly.com/python/line-charts/</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    fig =go.Figure()</span>
+<span class="sd">    fig.add_trace(go.Scatter(x=x_gt,y=y_gt,mode=&#39;markers&#39;,name=&#39;ground truth&#39;))</span>
+<span class="sd">    fig.show()</span>
+<span class="sd">    fig.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Source:https://docs.bokeh.org/en/latest/docs/first_steps/first_steps_1.html</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    p=figure(title=&quot;groundtruth&quot;)</span>
+<span class="sd">    p.line(x_gt,y_gt)</span>
+<span class="sd">    show(p)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Source:https://matplotlib.org/stable/tutorials/introductory/pyplot.html#sphx-glr-tutorials-introductory-pyplot-py</span>
+    <span class="c1">#print(len(x_gt))</span>
+    <span class="c1">#print(len(x_s))</span>
+    <span class="c1">#print(x_s)</span>
+    <span class="c1">#plt.plot(x_gt,y_gt,&#39;r.&#39;,x_s,y_s,&#39;b.&#39;,)</span>
+    <span class="c1">#plt.plot(x_s,y_s,&#39;b.&#39;)</span>
+    <span class="c1">#plt.show()</span>
+    <span class="c1">#fig=plt.figure()</span>
+    <span class="c1"># Source: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html</span>
+    <span class="n">plot1</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_s</span><span class="p">,</span><span class="n">y_s</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorT&#39;</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;jet&#39;</span><span class="p">),</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="o">.</span><span class="mi">75</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_gt</span><span class="p">,</span><span class="n">y_gt</span><span class="p">,</span><span class="s1">&#39;k-&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Error en la traslacion&#39;</span><span class="p">)</span>
+    <span class="c1">#plot1.show()</span>
+    
+    <span class="n">plot2</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_s</span><span class="p">,</span><span class="n">y_s</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorR&#39;</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;jet&#39;</span><span class="p">),</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="n">vmax</span><span class="o">=</span><span class="n">errDF</span><span class="p">[</span><span class="s1">&#39;errorR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="o">.</span><span class="mi">75</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_gt</span><span class="p">,</span><span class="n">y_gt</span><span class="p">,</span><span class="s1">&#39;k-&#39;</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Error en la rotacion&#39;</span><span class="p">)</span>
+    <span class="c1">#plot2.show()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">online</span><span class="p">():</span>
+    <span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="o">=</span><span class="n">load_csvs</span><span class="p">()</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">errDF</span><span class="o">=</span><span class="n">err_indx</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">errDF</span>
+
+
+<span class="k">def</span> <span class="nf">automatic</span><span class="p">():</span>
+    <span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="o">=</span><span class="n">load_csvs</span><span class="p">()</span>
+    <span class="n">odo</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">slam</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">slam</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">errDF</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="o">=</span><span class="n">err_indx</span><span class="p">(</span><span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="p">)</span>
+    <span class="n">plotting</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">errDF</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="p">,</span><span class="n">errDF</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">y</span><span class="o">=</span><span class="mi">1</span>
+    <span class="n">n</span><span class="o">=</span><span class="mi">0</span>
+    <span class="c1">#o=&#39;o&#39;</span>
+    <span class="n">command</span><span class="o">=</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;preprocesar datos? y/o (solo odometria)/n: &quot;</span><span class="p">)</span>
+    <span class="c1">#print(command)</span>
+    <span class="k">if</span> <span class="n">command</span><span class="o">==</span><span class="n">y</span><span class="p">:</span>
+        <span class="n">save_csvs</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">command</span><span class="o">==</span><span class="s1">&#39;o&#39;</span><span class="p">:</span>
+        <span class="n">save_csvs_odom</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;procesando desde los csv&#39;</span><span class="p">)</span>
+
+    <span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="o">=</span><span class="n">load_csvs</span><span class="p">()</span>
+    <span class="n">odo</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">slam</span><span class="o">=</span><span class="n">get_index</span><span class="p">(</span><span class="n">slam</span><span class="p">,</span><span class="n">slam</span><span class="p">)</span>
+    <span class="n">errDF</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="o">=</span><span class="n">err_indx</span><span class="p">(</span><span class="n">odo</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">gt</span><span class="p">)</span>
+    <span class="n">plotting</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span><span class="n">slam</span><span class="p">,</span><span class="n">errDF</span><span class="p">)</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/icm_slam.html">ICM SLAM</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

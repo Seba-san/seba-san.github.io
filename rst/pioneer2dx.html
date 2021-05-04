@@ -15,7 +15,7 @@
     <script src="../_static/translations.js"></script>
     <link rel="index" title="Índice" href="../genindex.html" />
     <link rel="search" title="Búsqueda" href="../search.html" />
-    <link rel="next" title="Campo" href="campo.html" />
+    <link rel="next" title="pioneer2dx.scripts.differential_controller" href="_autosummary/pioneer2dx.scripts.differential_controller.html" />
     <link rel="prev" title="Dynamic World Documentación" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -43,6 +43,7 @@ editor.</p>
 <p>A modo ilustrativo, con SolidWorks se pueden generar los mismos modelos sumado
 a que se incorporan los momentos de intercia y otros parámetros que ayudan a
 realizar una simulación más fieldigna.</p>
+<a class="reference internal image-reference" href="../_images/pioneer2dx.png"><img alt="../_images/pioneer2dx.png" class="align-center" src="../_images/pioneer2dx.png" style="width: 300px;" /></a>
 <div class="section" id="modelo-del-robot-diferencial">
 <span id="mod-robot-diferencial"></span><h2>Modelo del robot diferencial<a class="headerlink" href="#modelo-del-robot-diferencial" title="Enlazar permanentemente con este título">¶</a></h2>
 <p>El modelo del robot implementado es del tipo diferencial, ya sea con 2 ruedas o
@@ -51,7 +52,8 @@ corresponde al robot diferencial de 2 ruedas. Sin embargo es relativamente
 sencillo modificarlo desde el archivo xml <a class="reference internal" href="model.html#model-xacro"><span class="std std-ref">Detalle sobre archivos XML (.xml, .xacro, .sdf)</span></a>.</p>
 <div class="section" id="modelo-matematico">
 <h3>Modelo matemático<a class="headerlink" href="#modelo-matematico" title="Enlazar permanentemente con este título">¶</a></h3>
-<p>Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (<img class="math" src="../_images/math/13dc89b7b31168910835c028abaec6fea6743145.png" alt="a=0"/>), considerando la Figura XXX, el sistema resulta:</p>
+<a class="reference internal image-reference" href="../_images/model.png"><img alt="../_images/model.png" class="align-center" src="../_images/model.png" style="width: 300px;" /></a>
+<p>Asumiento que el punto de interés se encuentra en el punto medio entre el eje de las ruedas (<img class="math" src="../_images/math/13dc89b7b31168910835c028abaec6fea6743145.png" alt="a=0"/>), considerando la figura anterior, el sistema resulta:</p>
 <div class="math">
 <p><img src="../_images/math/9db768642305f08d3b451fa3dd77fe9981d9162d.png" alt="\dot{x}_c&amp;=v_f \cos(\theta) -a \omega \sin (\theta) \\
 \dot{y}_c&amp;=v_f \sin(\theta) +a \omega \cos (\theta)\\
@@ -65,7 +67,18 @@ sencillo modificarlo desde el archivo xml <a class="reference internal" href="mo
 </div>
 <div class="section" id="controladores">
 <span id="id2"></span><h2>Controladores<a class="headerlink" href="#controladores" title="Enlazar permanentemente con este título">¶</a></h2>
-<p>La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir <strong>hay seguimiento perfecto de las velocidades angulares</strong>. Para publicar mensajes en el tipic del controlador, se puede hacer mediante la librería <a class="reference external" href="scripts.differential_controllermodule">differential controller</a>.</p>
+<p>La libreria de los controladores, mediante los plugins de Gazebo, permite controlar las velocidades de cada rueda. El controlador que controla cada rueda aplica la velocidaded publicada en el topic XXX instantáneamente, es decir <strong>hay seguimiento perfecto de las velocidades angulares</strong>. Para publicar mensajes en el topic del controlador, se puede hacer mediante la librería</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pioneer2dx.scripts.differential_controller.html#module-pioneer2dx.scripts.differential_controller" title="pioneer2dx.scripts.differential_controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pioneer2dx.scripts.differential_controller</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <dl>
 <dt>Los comandos de la librería son:</dt><dd><ul class="simple">
 <li><p>a : para <img class="math" src="../_images/math/e52cd7f1eec2dc6e0e289a78c57993f93f7f0e24.png" alt="\omega=\omega+0.01 rad/s"/></p></li>
@@ -137,7 +150,7 @@ Ejemplo de uso: ……………………..</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../index.html" title="capítulo anterior">Dynamic World Documentación</a></li>
-      <li>Next: <a href="campo.html" title="próximo capítulo">Campo</a></li>
+      <li>Next: <a href="_autosummary/pioneer2dx.scripts.differential_controller.html" title="próximo capítulo">pioneer2dx.scripts.differential_controller</a></li>
   </ul></li>
 </ul>
 </div>
