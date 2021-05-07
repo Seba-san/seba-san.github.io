@@ -89,6 +89,8 @@ Referencias
    rst/campo
    rst/sm_bk
    rst/icm_slam
+   rst/sphinx
+
 
 Índices y Tablas
 ==================

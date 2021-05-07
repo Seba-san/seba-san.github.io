@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Explicacion de como documentar usando las librerias de Sphinx &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../search.html" />
+    <link rel="prev" title="ICM SLAM" href="icm_slam.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="explicacion-de-como-documentar-usando-las-librerias-de-sphinx">
+<h1>Explicacion de como documentar usando las librerias de <em>Sphinx</em><a class="headerlink" href="#explicacion-de-como-documentar-usando-las-librerias-de-sphinx" title="Enlazar permanentemente con este título">¶</a></h1>
+<p><strong>Sphinx</strong> es la forma más rápida de crear documentación de forma dinámica. Permite crear HTML, PDF, MAN, entre otros.</p>
+<p>Idealmente hay que instalarlo en python3. Si por defecto la pc tiene python 2, se pueden usar <em>environments</em>. Para más información ver <a class="reference external" href="https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment">Creating a virtual environment</a>. A modo de resumen para crear el entorno hay que hacer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m venv env
+</pre></div>
+</div>
+<p>luego <strong>env</strong> es el nombre del entorno, pudiendo cambiarlo por cualquier otro. Luego para ejecutar el entorno en una termina determinada hay que posicionarse en la carpeta en donde se ejecuto el entorno (la que tiene una carpeta con el nombre <em>env</em>) y luego hacer</p>
+<div class="highlight-bash notranslate" id="launch-evironment"><div class="highlight"><pre><span></span><span class="nb">source</span> env/bin/bash
+</pre></div>
+</div>
+<p>Si todo funcionó bien, deberia aparecer a la izquierda del prompt el nombre del entoro entre parentesis: (env).</p>
+<p>Una vez inicializado correctamente el entorno, todos los paquetes instalados con el comando <strong>pip</strong> serán instalados dentro del directorio «env» de forma local, no afectando a otros proyectos que convivan dentro del mismo sistema de archivos. Por ejemplo si uno desea instalar <em>sphinx</em> hay que hacer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -U sphinx
+</pre></div>
+</div>
+<p>Para configurarlo conviene usar el comando <strong>sphinx-quickstart</strong> y dejar todas las opciones por default. Es recomendable iniciar la documentación en una nueva carpeta llamada <em>docs</em> (normalmente se usa ese nombre para la documentación). Para mas información ver <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/quickstart.html">sphinx</a> .</p>
+<div class="section" id="ya-en-produccion">
+<h2>Ya en producción<a class="headerlink" href="#ya-en-produccion" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Una vez que ya está funcionando, los archivos de configuración son los <strong>.rst</strong>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>El archivo <em>index.rst</em> es la página principal.</p></li>
+<li><p>Los comandos arrancan con «..», por ejemplo «.. autodoc::»</p></li>
+<li><p>La primer linea inmediatamente inferior son las configuraciones de ese comando, y si se deja un espacio en blanco, son los argumentos.</p></li>
+<li><p><strong>.. toctree::</strong> Genera un índice de los argumentos. Dichos argumentos son los las direcciones en el sistema de archivos de los otros archivos de configuración .rst.</p></li>
+<li><p>Por otro lado antes de cada comando hay que dejar un espacio en blanco.</p></li>
+</ul>
+</div></blockquote>
+<p>Para compilar una página hay que ir a la carpeta base, es decir <em>docs/</em> y ejecutar:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make html
+</pre></div>
+</div>
+<p>Si sale un error parecido al siguiente:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Posibles errores:
+Running Sphinx v1.6.7
+loading translations <span class="o">[</span>es<span class="o">]</span>... <span class="k">done</span>
+
+Extension error:
+Could not import extension sphinxcontrib.bibtex <span class="o">(</span>exception: No module named <span class="s1">&#39;sphinxcontrib&#39;</span><span class="o">)</span>
+Makefile:20: recipe <span class="k">for</span> target <span class="s1">&#39;html&#39;</span> failed
+make: *** <span class="o">[</span>html<span class="o">]</span> Error <span class="m">1</span>
+</pre></div>
+</div>
+<p>quiere decir que faltó ejecutar el entorno (ver <a class="reference internal" href="#launch-evironment"><span class="std std-ref">launch environment</span></a>).</p>
+<p>Luego para ver el resultado hay que ir a la carpeta <em>_build/html</em> y de ahí conozco 2 opciones:</p>
+<blockquote>
+<div><ul>
+<li><p>Abrir con firefox el archivo <em>index.html</em></p></li>
+<li><p>Ejecutar el entorno y poner el código:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m http.server <span class="m">8000</span> --bind <span class="m">127</span>.0.0.1
+</pre></div>
+</div>
+<p>Luego de eso en el navegador poner:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>http://127.0.0.1:8000/index.html
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+<p>Si surgen otras cosas luego de un tiempo, agregarlas en esta parte.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icm_slam.html">ICM SLAM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ya-en-produccion">Ya en producción</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="icm_slam.html" title="capítulo anterior">ICM SLAM</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/rst/sphinx.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,80 @@
+Explicacion de como documentar usando las librerias de *Sphinx*
+================================================================
+
+**Sphinx** es la forma más rápida de crear documentación de forma dinámica. Permite crear HTML, PDF, MAN, entre otros.
+
+Idealmente hay que instalarlo en python3. Si por defecto la pc tiene python 2, se pueden usar *environments*. Para más información ver `Creating a virtual environment <https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment>`_. A modo de resumen para crear el entorno hay que hacer:
+
+.. code-block:: bash
+    
+    python3 -m venv env
+
+luego **env** es el nombre del entorno, pudiendo cambiarlo por cualquier otro. Luego para ejecutar el entorno en una termina determinada hay que posicionarse en la carpeta en donde se ejecuto el entorno (la que tiene una carpeta con el nombre *env*) y luego hacer
+
+.. code-block:: bash
+    :name: launch_evironment
+    
+    source env/bin/bash
+
+Si todo funcionó bien, deberia aparecer a la izquierda del prompt el nombre del entoro entre parentesis: (env).
+
+Una vez inicializado correctamente el entorno, todos los paquetes instalados con el comando **pip** serán instalados dentro del directorio "env" de forma local, no afectando a otros proyectos que convivan dentro del mismo sistema de archivos. Por ejemplo si uno desea instalar *sphinx* hay que hacer:
+
+.. code-block:: bash
+   
+    pip install -U sphinx
+  
+Para configurarlo conviene usar el comando **sphinx-quickstart** y dejar todas las opciones por default. Es recomendable iniciar la documentación en una nueva carpeta llamada *docs* (normalmente se usa ese nombre para la documentación). Para mas información ver `sphinx <https://www.sphinx-doc.org/en/master/usage/quickstart.html>`_ .
+
+
+Ya en producción
+------------------
+
+Una vez que ya está funcionando, los archivos de configuración son los **.rst**. 
+
+ - El archivo *index.rst* es la página principal. 
+ - Los comandos arrancan con "..", por ejemplo ".. autodoc::" 
+ - La primer linea inmediatamente inferior son las configuraciones de ese comando, y si se deja un espacio en blanco, son los argumentos.
+ - **.. toctree::** Genera un índice de los argumentos. Dichos argumentos son los las direcciones en el sistema de archivos de los otros archivos de configuración .rst.
+ - Por otro lado antes de cada comando hay que dejar un espacio en blanco. 
+
+Para compilar una página hay que ir a la carpeta base, es decir *docs/* y ejecutar:
+
+.. code-block:: bash
+
+    make html
+
+Si sale un error parecido al siguiente:
+
+.. code-block:: bash
+
+
+    Posibles errores:
+    Running Sphinx v1.6.7
+    loading translations [es]... done
+    
+    Extension error:
+    Could not import extension sphinxcontrib.bibtex (exception: No module named 'sphinxcontrib')
+    Makefile:20: recipe for target 'html' failed
+    make: *** [html] Error 1
+    
+quiere decir que faltó ejecutar el entorno (ver :ref:`launch environment  <launch_evironment>`).
+
+Luego para ver el resultado hay que ir a la carpeta *_build/html* y de ahí conozco 2 opciones:
+
+ - Abrir con firefox el archivo *index.html*
+ - Ejecutar el entorno y poner el código:
+
+   .. code-block:: bash
+
+    python -m http.server 8000 --bind 127.0.0.1
+
+
+   Luego de eso en el navegador poner:
+
+   .. code-block:: bash
+
+    http://127.0.0.1:8000/index.html
+
+
+Si surgen otras cosas luego de un tiempo, agregarlas en esta parte. 

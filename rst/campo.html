@@ -16,7 +16,7 @@
     <link rel="index" title="Índice" href="../genindex.html" />
     <link rel="search" title="Búsqueda" href="../search.html" />
     <link rel="next" title="Slam Benchmark" href="sm_bk.html" />
-    <link rel="prev" title="Pioneer2dx" href="pioneer2dx.html" />
+    <link rel="prev" title="pioneer2dx.scripts.differential_controller" href="_autosummary/pioneer2dx.scripts.differential_controller.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -35,11 +35,11 @@
             
   <div class="section" id="campo">
 <span id="id1"></span><h1>Campo<a class="headerlink" href="#campo" title="Enlazar permanentemente con este título">¶</a></h1>
-<p>Este package engloba en conjunto de herramientas que permiten crear automaticamente entornos agrícolas. La comunicación entre programas es por medio de archivos .yaml estructurados de cierta manera. De manera ilustrativa se muestra un diagrama en bloques de todo el sistema, luego se describiran algunas partes relevantes.</p>
+<p>Este package engloba en conjunto de herramientas que permiten crear automaticamente entornos agrícolas. La comunicación entre programas es por medio de archivos .yaml estructurados de cierta manera. De forma ilustrativa se muestra un diagrama en bloques de todo el sistema, luego se describiran algunas partes relevantes.</p>
 <img alt="../_images/xml_actual.png" src="../_images/xml_actual.png" />
 <div class="section" id="interfaz-gragica-gui">
 <h2>Interfaz Grágica (GUI)<a class="headerlink" href="#interfaz-gragica-gui" title="Enlazar permanentemente con este título">¶</a></h2>
-<p>Mediante un archivo de creacion de la interfaz gráfica llamado GUI.py se puede estructura de forma básica la GUI. Para hacer uso de esta libreria hay que poner en la terminal</p>
+<p>Mediante un archivo de configuración de la interfaz gráfica llamado GUI.py se le da la estructura básica a la GUI. Para hacer uso de esta libreria hay que poner en la terminal</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python GUI.py
 </pre></div>
 </div>
@@ -51,7 +51,7 @@
 </div>
 <div class="section" id="archivos-de-configuracion-yaml">
 <h2>Archivos de configuracion .yaml<a class="headerlink" href="#archivos-de-configuracion-yaml" title="Enlazar permanentemente con este título">¶</a></h2>
-<p>Los archivos de configuracion <em>.yaml</em> son archivos de texto plano con un formato particular y muy popular dentro de los scripts en python. Tiene la particularidad de que el contenido se puede leer generando un diccionario (de python). Por ejemplo un archivo de configuracion puede ser:</p>
+<p>Los archivos de configuracion <em>.yaml</em> son archivos de texto plano con un formato particular y muy popular dentro de los scripts en python. Tiene la particularidad de que cuando el archivo se lee genera un diccionario (de python). Por ejemplo un archivo de configuracion puede ser:</p>
 <div class="highlight-yaml notranslate" id="configmodel-yaml"><div class="highlight"><pre><span></span> <span class="nt">maleza</span><span class="p">:</span>
      <span class="nt">pose_x</span><span class="p">:</span>
          <span class="nt">distribution</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">normal</span>
@@ -92,7 +92,7 @@
 <h3>Modular Tree<a class="headerlink" href="#modular-tree" title="Enlazar permanentemente con este título">¶</a></h3>
 <p>La generación automática de árboles realistas se hace gracias a <span id="id2"><a class="reference internal" href="../index.html#id8">WP95</a></span>.</p>
 <p>Mediante la libreria <a class="reference external" href="https://github.com/MaximeHerpin/modular_tree/wiki">modular Tree</a> y a partir de los archivos base llamados <em>belnderAPI_V2.py</em> y <em>createTree.py</em> permite generar ciertas variaciones del mismo objeto.</p>
-<p>Actualmente este objeto en el archivo .blend debe estar seteado de determinada forma para que todo funcione bien, ya que el soft asume ciertas condiciones iniciales. El archivo actual que se esta usando se llama <em>script_realTree_v5.blend</em>.</p>
+<p>Actualmente el objeto en el archivo .blend debe estar seteado de determinada forma para que todo funcione bien, ya que el soft asume ciertas condiciones iniciales. El archivo actual que se esta usando se llama <em>script_realTree_v5.blend</em>.</p>
 <div class="admonition note">
 <p class="admonition-title">Nota</p>
 <p>commit 8153845fad4fc4c2a00b92f3caa98a0752641b97</p>
@@ -105,7 +105,7 @@
 </ul>
 </dd>
 </dl>
-<p>A modo de observación, se creeó una libreria que sirve de capa intermedia para todas las configuraciones de <em>Modular Tree</em>.  Esta se llama <em>modularTree.py</em> y tiene implementadas todas las clases del AddOn. Sin embargo no esta todo implementado con respecto a los archivos de configuración. Para ver el código fuente revisar <a class="reference internal" href="code/modularTree.html#modulartree"><span class="std std-ref">modularTree</span></a></p>
+<p>A modo de observación, se creeó una libreria que sirve de capa intermedia para todas las configuraciones de <em>Modular Tree</em>.  Esta se llama <em>modularTree.py</em> y tiene implementadas todas las clases del <em>AddOn</em>. Sin embargo no está todo implementado con respecto a los archivos de configuración. Para ver el código fuente revisar <a class="reference internal" href="code/modularTree.html#modulartree"><span class="std std-ref">modularTree</span></a></p>
 </div>
 </div>
 <div class="section" id="generacion-autimatica-de-xml">
@@ -151,13 +151,14 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
 <li class="toctree-l1"><a class="reference internal" href="icm_slam.html">ICM SLAM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sphinx.html">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="pioneer2dx.html" title="capítulo anterior">Pioneer2dx</a></li>
+      <li>Previous: <a href="_autosummary/pioneer2dx.scripts.differential_controller.html" title="capítulo anterior">pioneer2dx.scripts.differential_controller</a></li>
       <li>Next: <a href="sm_bk.html" title="próximo capítulo">Slam Benchmark</a></li>
   </ul></li>
 </ul>
