@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>campo.scripts.modularTree &#8212; documentación de Dynamic World - 0.2.0</title>
+    <title>ICM_SLAM.scripts.funciones_viejas &#8212; documentación de Dynamic World - 0.2.0</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -31,12 +31,8 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-campo.scripts.modularTree">
-<span id="campo-scripts-modulartree"></span><h1>campo.scripts.modularTree<a class="headerlink" href="#module-campo.scripts.modularTree" title="Enlazar permanentemente con este título">¶</a></h1>
-<p>La idea de este programa es que sirva para anotar las caracteristicas de cada
-opcion «importante» en modularTree addon. Funciona como una capa intermedia
-entre blender y el usuario final, algo asi como un traductor o un diccionario.</p>
-<p>Un video donde se explica casi todo: <a class="reference external" href="https://youtu.be/frjwKK_Bw74">Blender - Modular tree - tutorial en español</a></p>
+  <div class="section" id="module-ICM_SLAM.scripts.funciones_viejas">
+<span id="icm-slam-scripts-funciones-viejas"></span><h1>ICM_SLAM.scripts.funciones_viejas<a class="headerlink" href="#module-ICM_SLAM.scripts.funciones_viejas" title="Enlazar permanentemente con este título">¶</a></h1>
 <p class="rubric">Functions</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -44,32 +40,11 @@ entre blender y el usuario final, algo asi como un traductor o un diccionario.</
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actualizar_mapa</span></code>(mapa, yy, obs, Lact, config)</p></td>
+<td><p>mapa,cant_obs_i,c,Lact=actualizar_mapa(mapa,yy,obs,Lact,config)</p></td>
 </tr>
-</tbody>
-</table>
-<p class="rubric">Classes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="modularTree.html#campo.scripts.modularTree.BranchNode" title="campo.scripts.modularTree.BranchNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BranchNode</span></code></a>()</p></td>
-<td><p>Este nodo determina las caracteristicas de como se comportan las ramas Para mayor información acceder a la libreria en github o mediante blender.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="modularTree.html#campo.scripts.modularTree.Tree" title="campo.scripts.modularTree.Tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tree</span></code></a>()</p></td>
-<td><p>Junta todas las propiedades del arbol y agrega un diccionario para poder llamar desde un yaml distintas funcionalidades.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="modularTree.html#campo.scripts.modularTree.TreeParameters" title="campo.scripts.modularTree.TreeParameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TreeParameters</span></code></a>()</p></td>
-<td><p>Para mayor información acceder a la libreria en github o mediante blender.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="modularTree.html#campo.scripts.modularTree.TrunkNode" title="campo.scripts.modularTree.TrunkNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrunkNode</span></code></a>()</p></td>
-<td><p>Tronco principal, este es el único objeto obligatorio Para mayor información acceder a la libreria en github o mediante blender.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="modularTree.html#campo.scripts.modularTree.TwingNode" title="campo.scripts.modularTree.TwingNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TwingNode</span></code></a>()</p></td>
-<td><p>Este nodo frabrica las hojas.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filtrar_y</span></code>(y, cant_obs_i, Lact, config)</p></td>
+<td><p>[y,cant_obs_i,Lact]=filtrar_y(y,cant_obs_i,Lact,config)</p></td>
 </tr>
 </tbody>
 </table>
@@ -138,7 +113,7 @@ entre blender y el usuario final, algo asi como un traductor o un diccionario.</
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../../_sources/rst/code/campo.scripts.modularTree.rst.txt"
+      <a href="../../_sources/rst/_autosummary/ICM_SLAM.scripts.funciones_viejas.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

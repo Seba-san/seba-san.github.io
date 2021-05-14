@@ -15,7 +15,8 @@
     <script src="../_static/translations.js"></script>
     <link rel="index" title="Índice" href="../genindex.html" />
     <link rel="search" title="Búsqueda" href="../search.html" />
-    <link rel="prev" title="Slam Benchmark" href="sm_bk.html" />
+    <link rel="next" title="Explicacion de como documentar usando las librerias de Sphinx" href="sphinx.html" />
+    <link rel="prev" title="slam_benchmark.scripts.test" href="_autosummary/slam_benchmark.scripts.test.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -34,6 +35,182 @@
             
   <div class="section" id="icm-slam">
 <span id="id1"></span><h1>ICM SLAM<a class="headerlink" href="#icm-slam" title="Enlazar permanentemente con este título">¶</a></h1>
+<p>La idea de este modulo es poder configurar el slam desde <em>external_options.py</em> y <em>config_default.yaml</em>.</p>
+<div class="section" id="external-options">
+<h2>external_options<a class="headerlink" href="#external-options" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>En este archivo se define la estructura del programa principal y se ejecutan los modulos de <em>ICM_SLAM.py</em>. Para un correcto funcionamiento es encesario definir:</p>
+<p><strong>g</strong>: Ec. cinemática del vehículo. Definida en <span id="id2"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">ut</span><span class="p">):</span>
+    <span class="n">xt</span><span class="o">=</span><span class="n">xt</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">ut</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">S</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">]))[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+    <span class="n">gg</span><span class="o">=</span><span class="n">xt</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">deltat</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">ut</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">gg</span>
+</pre></div>
+</div>
+<p><strong>h</strong>: Ec. de medición. Definida en <span id="id3"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Poner un ejemplo de implementación.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">zt</span><span class="p">):</span>
+    <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_visto</span>
+    <span class="n">alfa</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span>
+    <span class="n">zc</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alfa</span><span class="p">)</span>
+    <span class="n">zs</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alfa</span><span class="p">)</span>
+    <span class="c1"># Resta la posicion de cada punto al mapa &quot;visto&quot;. (y no es todo el mapa,</span>
+    <span class="c1"># solo la parte matcheada en &quot;actualizar mapa&quot;)</span>
+    <span class="n">distancias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">xt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">zc</span><span class="p">,</span><span class="n">xt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">zs</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">alfa</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span><span class="o">-</span><span class="n">y</span>
+    <span class="c1"># Calcula la norma :math:`hh^TQhh`</span>
+    <span class="n">aux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">distancias</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+    <span class="n">potencial</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">aux</span><span class="o">*</span><span class="n">distancias</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">potencial</span>
+</pre></div>
+</div>
+<div class="section" id="optativamente">
+<h3>Optativamente<a class="headerlink" href="#optativamente" title="Enlazar permanentemente con este título">¶</a></h3>
+<p><strong>fun_x</strong>: Es el argumento de la función definido en la Ec. (11) de <span id="id4"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal <strong>causal</strong> (que depende solo del tiempo actual y de los pasados). Ya que se ejecutará en la etapa de inicialización <strong>online</strong>.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fun_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Argumento de la Ec. (11) del paper.</span>
+
+<span class="sd">    Función a minimizar que depende de:</span>
+<span class="sd">     - Odometria</span>
+<span class="sd">     - Estimacion de pose anterior</span>
+<span class="sd">     - Modelo cinemático de movimiento</span>
+<span class="sd">     - Modelo de las observaciones</span>
+<span class="sd">     - Observaciones en un instate dado</span>
+
+<span class="sd">    Parámetros</span>
+<span class="sd">    -----------</span>
+
+<span class="sd">    Entrada:</span>
+<span class="sd">     - x: posición.</span>
+
+<span class="sd">    Salida:</span>
+<span class="sd">     - f: potencial energético.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">medicion_actual</span>
+    <span class="n">x_ant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span>
+    <span class="n">u_ant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u_ant_opt</span>
+    <span class="n">odo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span>
+    <span class="c1"># vector desplazamiento entre las estimacion de pose anterior y la pose</span>
+    <span class="c1"># actual X.</span>
+    <span class="n">gg</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">x_ant</span><span class="p">,</span><span class="n">u_ant</span><span class="p">)</span>
+    <span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">hh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">Rotador</span><span class="o">=</span><span class="n">Rota</span><span class="p">(</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ooo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># Calcula la diferencia entre los vectores desplazamiento. Entre la</span>
+    <span class="c1"># odometria y la pose x (de forma relativa, con respecto a la pose anterior)</span>
+    <span class="c1"># Ec. (16) del paper.</span>
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rota</span><span class="p">(</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]),(</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>\
+            <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rotador</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">gg</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">R</span><span class="p">),</span><span class="n">gg</span><span class="p">)</span><span class="o">+</span>\
+       <span class="n">hh</span><span class="o">+</span>\
+       <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cte_odom</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">ooo</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">ooo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p><strong>fun_xn</strong>: Es el argumento de la función definido en la Ec. (14) de <span id="id5"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal. Ya que se ejecutará en la etapa de optimizacion <strong>offline</strong>. En general dicha función puede incluir en su calculo la salida de la funcion <em>fun_x</em>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fun_xn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Función a minimizar.</span>
+
+<span class="sd">    Parte del argumento de la Ec. (14) del papaer. Esta función incluye a</span>
+<span class="sd">    fun_x, ya que usa la información previa (fun_x) e información futura.</span>
+<span class="sd">    En este codigo solo se incorpora la información futura.</span>
+
+<span class="sd">    Entrada:</span>
+<span class="sd">     - x: Pose</span>
+
+<span class="sd">    Salida:</span>
+<span class="sd">     - f: Potencial energético debido al modelo cinemático y a la</span>
+<span class="sd">       odometría.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_pos_opt</span>
+    <span class="n">u_act</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u_act_opt</span>
+    <span class="n">odo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span>
+
+    <span class="n">f</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_x</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">gg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">u_act</span><span class="p">)</span><span class="o">-</span><span class="n">x_pos</span>
+    <span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">Rotador</span><span class="o">=</span><span class="n">Rota</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ooo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># Calcula la diferencia entre los vectores desplazamiento. Entre la</span>
+    <span class="c1"># odometria y la pose x (de forma relativa, con respecto a la pose anterior)</span>
+    <span class="c1"># Ec. (16) del paper.</span>
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rota</span><span class="p">(</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]),(</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>\
+            <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rotador</span><span class="p">,</span><span class="n">x_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">gg</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">R</span><span class="p">),</span><span class="n">gg</span><span class="p">)</span>\
+       <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cte_odom</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">ooo</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">ooo</span><span class="p">)</span>\
+       <span class="o">+</span><span class="n">f</span>
+    <span class="k">return</span> <span class="n">f</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="config-default-yaml">
+<h2>config_default.yaml<a class="headerlink" href="#config-default-yaml" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>En este archivo se definen los parámetros de configuración del sistema. A continuación se pone una copia de los datos utilizados en  <span id="id6"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
+<div class="highlight-yaml notranslate" id="id7"><div class="highlight"><pre><span></span><span class="nt">D</span><span class="p">:</span>
+    <span class="nt">N</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+    <span class="nt">deltat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
+    <span class="nt">L</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
+    <span class="nt">Q</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nv">1</span><span class="p p-Indicator">]</span>
+    <span class="nt">R</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nv">1</span><span class="p p-Indicator">]</span>
+    <span class="nt">cte_odom</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+    <span class="nt">cota</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">300.0</span>
+    <span class="nt">dist_thr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1.0</span>
+    <span class="nt">dist_thr_obs</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+    <span class="nt">rango_laser_max</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.0</span>
+    <span class="nt">radio</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.137</span>
+</pre></div>
+</div>
+<div class="section" id="definiciones">
+<h3>Definiciones<a class="headerlink" href="#definiciones" title="Enlazar permanentemente con este título">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>N: Cantidad de iteraciones ICM.</p></li>
+<li><p>deltat: Periodo de muestreo.</p></li>
+<li><p>Tf: Cantidad total de periodos de muestreo.</p></li>
+<li><p>L: cota superior de la cantidad de objetos (max landmarks).</p></li>
+<li><p>Q: Diagonal de la matriz que define la norma de las observaciones.</p></li>
+<li><p>R: Diagonal de la matriz que define la norma del modelo de moviemiento.</p></li>
+<li><p>S: Diagonal de la matriz que define la norma de la odometría.</p></li>
+<li><p>cota: Cantidad de veces que hay que ver un árbol para q se considere un árbol.</p></li>
+<li><p>dist_thr: Distancia máxima para que dos obs sean consideradas del mismo objeto.</p></li>
+<li><p>dist_thr_obs: Distancia máxima para que dos obs sean consideradas del mismo objeto en el proceso de filtrado de las observaciones.</p></li>
+<li><p>rango_laser_max: Alcance máximo del laser.</p></li>
+<li><p>radio: Radio promedio de los árboles.</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="implementaciones">
+<h2>Implementaciones<a class="headerlink" href="#implementaciones" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>En la actualidad se encuentra implementado el codigo en python para un dataset offline almacenado en un archivo .mat . En la brevedad se terminará de desarrollar el código para correrlo en una red ROS.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Para mayor informacion ir a la rama <em>master</em> del repositorio.</p></li>
+<li><p>En la rama <em>ros_package</em> se encuentra el desarrollo de la implementacion en la red ROS.</p></li>
+</ul>
+</div></blockquote>
+</div>
 </div>
 
 
@@ -58,14 +235,21 @@
 <li class="toctree-l1"><a class="reference internal" href="pioneer2dx.html">Pioneer2dx</a></li>
 <li class="toctree-l1"><a class="reference internal" href="campo.html">Campo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ICM SLAM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ICM SLAM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#external-options">external_options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-default-yaml">config_default.yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementaciones">Implementaciones</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sphinx.html">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="sm_bk.html" title="capítulo anterior">Slam Benchmark</a></li>
+      <li>Previous: <a href="_autosummary/slam_benchmark.scripts.test.html" title="capítulo anterior">slam_benchmark.scripts.test</a></li>
+      <li>Next: <a href="sphinx.html" title="próximo capítulo">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>
   </ul></li>
 </ul>
 </div>

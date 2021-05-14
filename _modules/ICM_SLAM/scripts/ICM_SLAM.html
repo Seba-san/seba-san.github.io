@@ -1,0 +1,740 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICM_SLAM.scripts.ICM_SLAM &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para ICM_SLAM.scripts.ICM_SLAM</h1><div class="highlight"><pre>
+<span></span><span class="c1">#Importa todos los paquetes</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">numpy.matlib</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">squareform</span><span class="p">,</span> <span class="n">cdist</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">medfilt</span>
+<span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">linkage</span><span class="p">,</span> <span class="n">fcluster</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">fmin</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span> <span class="k">as</span> <span class="n">copy</span>
+<span class="c1">#from external_options import *</span>
+<span class="c1">#from external_options import g, h</span>
+<span class="kn">from</span> <span class="nn">funciones_varias</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c1">#import logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+
+<span class="k">def</span> <span class="nf">filtrar_z</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    zz=filtrar_z(z,config)</span>
+
+<span class="sd">    #Elimina observaciones aisladas o de rango máximo.</span>
+<span class="sd">    #Salida **zz** : es una matriz de 2 columnas que alista una abajo de otra las distancias y los angulos en los cuales hay una observación &quot;positiva&quot;.</span>
+
+<span class="sd">    Entradas:</span>
+<span class="sd">     - [float]_181x1 z: Medición del lidar en un instante de tiempo. De -90 a</span>
+<span class="sd">       90 (ejemplo)</span>
+<span class="sd">     - config: parámetros de configuración</span>
+
+<span class="sd">    Salidas:</span>
+<span class="sd">     - numpy array [dist ang x y] zz: Salida filtrada y reformateada, $1 revisar!!   </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">z</span><span class="o">=</span><span class="n">medfilt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>  <span class="c1">#filtro de mediana con ventana 3 para borrar observaciones laser outliers</span>
+    <span class="n">zz</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="c1">#copia para no sobreescribir</span>
+    <span class="c1">#hallo direcciones con observacion, el [0] es para solo quedarte con el</span>
+    <span class="c1">#array, no con la tupla</span>
+    <span class="n">nind</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">z</span><span class="o">&lt;</span><span class="n">config</span><span class="o">.</span><span class="n">rango_laser_max</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nind</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">[</span><span class="n">nind</span><span class="p">]</span> <span class="c1">#solo me quedo con las direcciones observadas</span>
+      <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">nind</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="p">,</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">nind</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nind</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="c1">#ahora z tiene puntos 2D con la ubicacion relativa de las observaciones realizadas</span>
+      <span class="n">c</span><span class="o">=</span><span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>  <span class="c1">#matriz de distrancia entre obs</span>
+      <span class="c1">#modifico la diagonal con un numero grande</span>
+      <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">100</span> <span class="c1">#$1 ojo, esto depende del rango máximo</span>
+      <span class="n">c</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#calculo la distancia al objeto más cercano de cada observacion</span>
+      <span class="n">nind</span><span class="o">=</span><span class="n">nind</span><span class="p">[</span><span class="n">c</span><span class="o">&lt;=</span><span class="n">config</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">]</span> <span class="c1">#elimino direcciones aisladas</span>
+      <span class="n">zz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zz</span><span class="p">[</span><span class="n">nind</span><span class="p">],</span><span class="n">nind</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nind</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="c1">#ahora zz contiene las distancias y la direccion (en radianes) de las observaciones no aisladas</span>
+      <span class="n">zzz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">zz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nind</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>\
+              <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">zz</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">zz</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">nind</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span> <span class="c1">#contiene la posicion relativa de las observaciones no aisladas</span>
+      <span class="n">zz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zz</span><span class="p">,</span><span class="n">zzz</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">zz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+    <span class="k">return</span> <span class="n">zz</span>
+
+<div class="viewcode-block" id="ICM_method"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method">[documentos]</a><span class="k">class</span> <span class="nc">ICM_method</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Esta clase sirve para computar los mínimos a las funciones fun_x y fun_xn. </span>
+<span class="sd">    Como es necesario pasar argumentos entre la función a minimizar y el minimizador, se opta por</span>
+<span class="sd">    utilizar esta *clase* en vez de declarar variables globales. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">):</span>
+        <span class="c1">#ICM_external.__init__(self,config)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ICM_method.minimizar_xn"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.minimizar_xn">[documentos]</a>    <span class="k">def</span> <span class="nf">minimizar_xn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">medicion_actual</span><span class="p">,</span><span class="n">mapa_visto</span><span class="p">,</span><span class="n">x_ant</span><span class="p">,</span><span class="n">x_pos</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">odometria</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        xt=minimizar_xn(z[:,0:2],y[:,c].T,xt,x[:,t+1],u[:,t-1:t+1],odometria[:,t-1:t+2])</span>
+<span class="sd">    </span>
+<span class="sd">        Ec. (14) del paper.</span>
+<span class="sd">        </span>
+<span class="sd">        yy contiene las ubicaciones estimadas hasta el momento de los arboles observados una abajo de la otra,</span>
+<span class="sd">        repitiendo observaciones repetidas e ignorando ubicaciones no observadas</span>
+<span class="sd">        zz contiene las observaciones realizadas una abajo de la otra. La primer columna contiene</span>
+<span class="sd">        distancias y la segunda ángulos relativos al laser del robot</span>
+<span class="sd">         </span>
+<span class="sd">         Entradas:</span>
+<span class="sd">         - [distancia, ángulo] medicion_actual: Mediciones para un instante de tiempo</span>
+<span class="sd">         - [(x,y) x c ] yy: Mapa con los landmarks vistos en un instante de</span>
+<span class="sd">           tiempo. </span>
+<span class="sd">         - [x y \theta] x_ant: Pose actual estimada con este minimizador.</span>
+<span class="sd">         - [x y \theta] x_pos: Pose futura. </span>
+<span class="sd">         - [v \omega] u: Señal de control del instante anterior</span>
+<span class="sd">         - [x y \theta]  odometria: Estimación de la pose dado por la</span>
+<span class="sd">           odometria en 2 instantes de tiempo.</span>
+<span class="sd">        Salida:</span>
+<span class="sd">         - x: la pose que minimiza el funcional fun_x.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">medicion_actual</span><span class="o">=</span><span class="n">medicion_actual</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapa_visto</span><span class="o">=</span><span class="n">mapa_visto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_ant_opt</span><span class="o">=</span><span class="n">u</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span><span class="o">=</span><span class="n">x_ant</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_act_opt</span><span class="o">=</span><span class="n">u</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_pos_opt</span><span class="o">=</span><span class="n">x_pos</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span><span class="o">=</span><span class="n">odometria</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">fmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_xn</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">x_pos_opt</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span><span class="n">xtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span><span class="n">disp</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="ICM_method.fun_xn"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.fun_xn">[documentos]</a>    <span class="k">def</span> <span class="nf">fun_xn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Función a minimizar. </span>
+
+<span class="sd">        Parte del argumento de la Ec. (14) del papaer. Esta función incluye a</span>
+<span class="sd">        fun_x, ya que usa la información previa (fun_x) e información futura.</span>
+<span class="sd">        En este codigo solo se incorpora la información futura. </span>
+
+<span class="sd">        Entrada:</span>
+<span class="sd">         - x: Pose</span>
+
+<span class="sd">        Salida:</span>
+<span class="sd">         - f: Potencial energético debido al modelo cinemático y a la</span>
+<span class="sd">           odometría.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_pos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_pos_opt</span>
+        <span class="n">u_act</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u_act_opt</span>
+        <span class="n">odo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_x</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">gg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">u_act</span><span class="p">)</span><span class="o">-</span><span class="n">x_pos</span>
+        <span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">Rotador</span><span class="o">=</span><span class="n">Rota</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ooo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Calcula la diferencia entre los vectores desplazamiento. Entre la</span>
+        <span class="c1"># odometria y la pose x (de forma relativa, con respecto a la pose anterior)</span>
+        <span class="c1"># Ec. (16) del paper.</span>
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rota</span><span class="p">(</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]),(</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>\
+                <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rotador</span><span class="p">,</span><span class="n">x_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">gg</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">R</span><span class="p">),</span><span class="n">gg</span><span class="p">)</span>\
+           <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cte_odom</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">ooo</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">ooo</span><span class="p">)</span>\
+           <span class="o">+</span><span class="n">f</span>
+        <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="ICM_method.minimizar_x"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.minimizar_x">[documentos]</a>    <span class="k">def</span> <span class="nf">minimizar_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">medicion_actual</span><span class="p">,</span><span class="n">mapa_visto</span><span class="p">,</span><span class="n">x_ant</span><span class="p">,</span><span class="n">u_ant</span><span class="p">,</span><span class="n">odometria</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        x=minimizar_x(self,zz,yy,xx_ant,uu_ant,odometria)</span>
+
+<span class="sd">        Ec. (11) del paper. </span>
+
+<span class="sd">        Agregar una descripción.</span>
+
+<span class="sd">        yy contiene las ubicaciones estimadas hasta el momento de los arboles observados una abajo de la otra, repitiendo observaciones repetidas e ignorando ubicaciones no observadas</span>
+<span class="sd">        zz contiene las observaciones realizadas una abajo de la otra. La primer columna contiene distancias y la segunda ángulos relativos al laser del robot</span>
+<span class="sd">        </span>
+<span class="sd">        xt=ICM.minimizar_x(z[:,0:2],y[:,c].T,xt,u[:,t-1],odometria[:,t-1:t+1])</span>
+<span class="sd">        </span>
+<span class="sd">        Entradas:</span>
+<span class="sd">         - [distancia, ángulo] medicion_actual: Mediciones para un instante de</span>
+<span class="sd">           tiempo, filtradas (sin outliers).</span>
+<span class="sd">         - [(x,y) x c ] mapa_visto: Mapa con los landmarks vistos en un instante de</span>
+<span class="sd">           tiempo.</span>
+<span class="sd">         - [x y \theta] x_ant: Pose anterior estimada con este minimizador.</span>
+<span class="sd">         - [v \omega] u_ant: Señal de control del instante anterior</span>
+<span class="sd">         - [x y \theta]  odometria: Estimación de la pose dado por la</span>
+<span class="sd">           odometria en 2 instantes de tiempo.</span>
+<span class="sd">        Salida:</span>
+<span class="sd">         - x: la pose que minimiza el funcional fun_x. </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">medicion_actual</span><span class="o">=</span><span class="n">medicion_actual</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapa_visto</span><span class="o">=</span><span class="n">mapa_visto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_ant_opt</span><span class="o">=</span><span class="n">u_ant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span><span class="o">=</span><span class="n">x_ant</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span><span class="o">=</span><span class="n">odometria</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">fmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fun_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">u_ant_opt</span><span class="p">),</span><span class="n">xtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span><span class="n">disp</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="ICM_method.fun_x"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.fun_x">[documentos]</a>    <span class="k">def</span> <span class="nf">fun_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Argumento de la Ec. (11) del paper.</span>
+
+<span class="sd">        Función a minimizar que depende de:</span>
+<span class="sd">         - Odometria</span>
+<span class="sd">         - Estimacion de pose anterior</span>
+<span class="sd">         - Modelo cinemático de movimiento</span>
+<span class="sd">         - Modelo de las observaciones</span>
+<span class="sd">         - Observaciones en un instate dado</span>
+<span class="sd">        </span>
+<span class="sd">        Parámetros</span>
+<span class="sd">        -----------</span>
+<span class="sd">        </span>
+<span class="sd">        Entrada:</span>
+<span class="sd">         - x: posición.</span>
+
+<span class="sd">        Salida:</span>
+<span class="sd">         - f: potencial energético.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">medicion_actual</span>
+        <span class="n">x_ant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_ant_opt</span>
+        <span class="n">u_ant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u_ant_opt</span>
+        <span class="n">odo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odo_opt</span>
+        <span class="c1"># vector desplazamiento entre las estimacion de pose anterior y la pose</span>
+        <span class="c1"># actual X.</span>
+        <span class="n">gg</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">x_ant</span><span class="p">,</span><span class="n">u_ant</span><span class="p">)</span>
+        <span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">gg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">hh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">Rotador</span><span class="o">=</span><span class="n">Rota</span><span class="p">(</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ooo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Calcula la diferencia entre los vectores desplazamiento. Entre la</span>
+        <span class="c1"># odometria y la pose x (de forma relativa, con respecto a la pose anterior)</span>
+        <span class="c1"># Ec. (16) del paper.</span>
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rota</span><span class="p">(</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]),(</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>\
+                <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rotador</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">odo</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">x_ant</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">entrepi</span><span class="p">(</span><span class="n">ooo</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">gg</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">R</span><span class="p">),</span><span class="n">gg</span><span class="p">)</span><span class="o">+</span>\
+           <span class="n">hh</span><span class="o">+</span>\
+           <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cte_odom</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">ooo</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">ooo</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span></div>
+    
+<div class="viewcode-block" id="ICM_method.load_data"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.load_data">[documentos]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mapa_obj</span><span class="p">,</span><span class="n">mediciones</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">odometria</span><span class="p">,</span><span class="n">x0</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Antes de iterar es necesario cargar todas las observaciones y las</span>
+<span class="sd">        acciones de control.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mediciones</span><span class="o">=</span><span class="n">mediciones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="o">=</span><span class="n">u</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">mapa_obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">odometria</span><span class="o">=</span><span class="n">odometria</span>
+        <span class="c1">#print(&#39;Cargando datos&#39;)</span>
+        <span class="c1">#print(self.mapa_obj.landmarks_actuales)</span>
+
+        <span class="k">if</span> <span class="n">x0</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c1">#guarda la pose actual (inicial en esta linea) del DDMR</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="o">=</span><span class="n">x0</span></div>
+
+<div class="viewcode-block" id="ICM_method.inicializar"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.inicializar">[documentos]</a>    <span class="k">def</span> <span class="nf">inicializar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Este método inicializa las variables para que luego se pueda refinar mediante ICM el mapa y las poses históricas del</span>
+<span class="sd">        vehículo.</span>
+
+<span class="sd">        Esta función es la que se implementa online. Toma los datos de las</span>
+<span class="sd">        mediciones, odometria, estados anteriores, etc. para estimar la pose</span>
+<span class="sd">        actual.</span>
+
+<span class="sd">        Argumentos de entrada:</span>
+<span class="sd">        ----------------------</span>
+<span class="sd">        Variables:</span>
+<span class="sd">         - Posiciones actuales &#39;x&#39;</span>
+<span class="sd">        Constantes:</span>
+<span class="sd">         - &#39;config&#39;</span>
+<span class="sd">         - Mediciones &#39;z&#39;</span>
+<span class="sd">         - acciones de control &#39;u&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        Argumentos de salida:</span>
+<span class="sd">        ---------------------</span>
+<span class="sd">         - Mapa actualizado &#39;mapa_refinado&#39;</span>
+<span class="sd">         - Posiciones refinadas &#39;x&#39; </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xt</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">L</span><span class="p">))</span> <span class="c1">#guarda la posicion de los a lo sumo L arboles del entorno</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">clear_obs</span><span class="p">()</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">filtrar_z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mediciones</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>  <span class="c1">#filtro la primer observacion [dist ang x y] x #obs</span>
+        <span class="n">u</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span>
+        <span class="n">odometria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odometria</span>
+
+        <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#print(&#39;skip!!!!!!!!!&#39;)</span>
+            <span class="k">return</span> <span class="n">y</span><span class="p">,</span><span class="n">x</span>
+            <span class="c1">#continue #si no hay observaciones pasar al siguiente periodo de muestreo</span>
+        
+        <span class="n">zt</span><span class="o">=</span><span class="n">tras_rot_z</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="c1">#rota y traslada las observaciones de acuerdo a la pose actual</span>
+        <span class="n">y</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">actualizar</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+    
+        <span class="c1">#BUCLE TEMPORAL</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Tf</span><span class="p">):</span>
+            <span class="c1"># aca va el bucle ros.</span>
+            <span class="n">xtc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">u</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1">#actualizo cinemáticamente la pose</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">filtrar_z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mediciones</span><span class="p">[:,</span><span class="n">t</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>  <span class="c1">#filtro observaciones no informativas del tiempo t: [dist ang x y] x #obs</span>
+            <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">xt</span><span class="o">=</span><span class="n">xtc</span>
+                <span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">xt</span><span class="o">.</span><span class="n">T</span>
+                <span class="k">continue</span>   <span class="c1">#si no hay observaciones pasar al siguiente periodo de muestreo</span>
+            
+            <span class="n">zt</span><span class="o">=</span><span class="n">tras_rot_z</span><span class="p">(</span><span class="n">xtc</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>  <span class="c1">#rota y traslada las observaciones de acuerdo a la pose actual</span>
+            <span class="n">y</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">actualizar</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">xt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minimizar_x</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">y</span><span class="p">[:,</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">xt</span><span class="p">,</span><span class="n">u</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">odometria</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">xt</span>
+        
+        <span class="c1">#filtro ubicaciones estimadas</span>
+
+        <span class="n">yy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">filtrar</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">yy</span><span class="o">=</span><span class="n">yy</span><span class="p">[:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">landmarks_actuales</span><span class="p">]</span>
+        <span class="n">mapa_inicial</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">yy</span><span class="p">)</span>
+
+        <span class="c1">#graficar(x,yy,iteracionICM)#gráficos</span>
+        <span class="k">return</span> <span class="n">mapa_inicial</span><span class="p">,</span><span class="n">x</span> </div>
+
+<div class="viewcode-block" id="ICM_method.itererar"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.itererar">[documentos]</a>    <span class="k">def</span> <span class="nf">itererar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mapa_viejo</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Este método refina mediante ICM el mapa y las poses históricas del</span>
+<span class="sd">        vehículo.</span>
+
+<span class="sd">        Argumentos de entrada:</span>
+<span class="sd">        ----------------------</span>
+<span class="sd">        Variables:</span>
+<span class="sd">         - Mapa a refinar &#39;mapa_viejo&#39;</span>
+<span class="sd">         - Posiciones actuales &#39;x&#39;</span>
+<span class="sd">        Constantes:</span>
+<span class="sd">         - &#39;config&#39;</span>
+<span class="sd">         - Mediciones &#39;z&#39;</span>
+<span class="sd">         - acciones de control &#39;u&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        Argumentos de salida:</span>
+<span class="sd">        ---------------------</span>
+<span class="sd">         - Mapa actualizado &#39;mapa_refinado&#39;</span>
+<span class="sd">         - Posiciones refinadas &#39;x&#39; </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xt</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">L</span><span class="p">))</span> <span class="c1">#guarda la posicion de los a lo sumo L arboles del entorno</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">clear_obs</span><span class="p">()</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">filtrar_z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mediciones</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>  <span class="c1">#filtro la primer observacion [dist ang x y] x #obs</span>
+        <span class="n">odometria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">odometria</span>
+        <span class="n">u</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span>
+        <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#print(&#39;skip!!!!!!!!!&#39;)</span>
+            <span class="k">return</span> <span class="n">mapa_viejo</span><span class="p">,</span><span class="n">x</span>
+            <span class="c1">#continue #si no hay observaciones pasar al siguiente periodo de muestreo</span>
+        
+        <span class="n">zt</span><span class="o">=</span><span class="n">tras_rot_z</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="c1">#rota y traslada las observaciones de acuerdo a la pose actual</span>
+        <span class="n">y</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">actualizar</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">mapa_viejo</span><span class="p">,</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+    
+        <span class="c1">#BUCLE TEMPORAL</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Tf</span><span class="p">):</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">filtrar_z</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mediciones</span><span class="p">[:,</span><span class="n">t</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>  <span class="c1">#filtro observaciones no informativas del tiempo t: [dist ang x y] x #obs</span>
+            <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">xt</span><span class="o">=</span><span class="p">(</span><span class="n">xt</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">+</span><span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mf">2.0</span>
+                <span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">xt</span>
+                <span class="k">continue</span> <span class="c1">#si no hay observaciones pasar al siguiente periodo de muestreo</span>
+            
+            <span class="n">zt</span><span class="o">=</span><span class="n">tras_rot_z</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="p">],</span><span class="n">z</span><span class="p">)</span>  <span class="c1">#rota y traslada las observaciones de acuerdo a la pose actual</span>
+            <span class="n">y</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">actualizar</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">mapa_viejo</span><span class="p">,</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Tf</span><span class="p">:</span>
+                <span class="n">xt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minimizar_xn</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">y</span><span class="p">[:,</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">xt</span><span class="p">,</span><span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">u</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">odometria</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">minimizar_x</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span><span class="n">y</span><span class="p">[:,</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">xt</span><span class="p">,</span><span class="n">u</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">odometria</span><span class="p">[:,</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">x</span><span class="p">[:,</span><span class="n">t</span><span class="p">]</span><span class="o">=</span><span class="n">xt</span>
+        
+        <span class="c1">#filtro ubicaciones estimadas</span>
+
+        <span class="n">yy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">filtrar</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">yy</span><span class="o">=</span><span class="n">yy</span><span class="p">[:,:</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_obj</span><span class="o">.</span><span class="n">landmarks_actuales</span><span class="p">]</span>
+        <span class="c1">#print(mapa.Landmarks_actuales)</span>
+        <span class="c1">#print(mapa.cant_obs_i)</span>
+        <span class="c1">#print(yy)</span>
+        
+      
+        <span class="n">mapa_refinado</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">yy</span><span class="p">)</span>
+
+        <span class="c1">#graficar(x,yy,iteracionICM)#gráficos</span>
+        <span class="k">return</span> <span class="n">mapa_refinado</span><span class="p">,</span><span class="n">x</span></div>
+
+<div class="viewcode-block" id="ICM_method.g"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.g">[documentos]</a>    <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">ut</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modelo de la odometría</span>
+<span class="sd">        ========================</span>
+<span class="sd">        Actualización de la pose a partir de las señales de control usando solo la</span>
+<span class="sd">        cinemática del vehículo. Como referencia revisar definicion en el paper,</span>
+<span class="sd">        página 8/15. </span>
+<span class="sd">        Entradas:</span>
+<span class="sd">         - :math:`x_t=[ x_{t,x}, x_{t,y}, x_{t,\theta}]^T` </span>
+<span class="sd">         - :math:`u_t=[ v_t, \omega_t ]^T`</span>
+<span class="sd">         - config: Objeto que contiene todas las configuraciones</span>
+<span class="sd">    </span>
+<span class="sd">        Salida</span>
+<span class="sd">         - :math:`x_{t+1}=[ x_{t+1,x}, x_{t+1,y}, x_{t+1,\theta}]^T`</span>
+<span class="sd">    </span>
+<span class="sd">         A futuro poner la ecuación en este lugar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="n">xt</span><span class="o">=</span><span class="n">xt</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ut</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">S</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">]))[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]])</span>
+        <span class="n">gg</span><span class="o">=</span><span class="n">xt</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">deltat</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">ut</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">gg</span></div>
+    
+<div class="viewcode-block" id="ICM_method.h"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.ICM_SLAM.ICM_method.h">[documentos]</a>    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">zt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Función de potencial energético debido a las observaciones y al mapa. </span>
+<span class="sd">    </span>
+<span class="sd">        Modelo de las observaciones</span>
+<span class="sd">        =============================</span>
+<span class="sd">        Página 8/15 del paper.</span>
+<span class="sd">        Modelo de las observaciones para el Laser 2D</span>
+<span class="sd">        Entradas:</span>
+<span class="sd">         - :math:`x_t=[ x_{t,x}, x_{t,y}, x_{t,\theta}]^T` </span>
+<span class="sd">         - :math:`z_i=\{z_{t,i}:i=1,\cdots,n_t\}` :math:`z_{t,i}=[ z_{t,i,d}, z_{t,i,\theta} ]^T`</span>
+<span class="sd">         - config: Objeto que contiene todas las configuraciones</span>
+<span class="sd">    </span>
+<span class="sd">        Salida:</span>
+<span class="sd">         -  Potencial.</span>
+<span class="sd">    </span>
+<span class="sd">         Poner la forma de la función que esta en el paper.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    
+        <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_visto</span>
+        <span class="n">alfa</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">zc</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alfa</span><span class="p">)</span>
+        <span class="n">zs</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alfa</span><span class="p">)</span>
+        <span class="c1"># Resta la posicion de cada punto al mapa &quot;visto&quot;. (y no es todo el mapa,</span>
+        <span class="c1"># solo la parte matcheada en &quot;actualizar mapa&quot;)</span>
+        <span class="n">distancias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">xt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">zc</span><span class="p">,</span><span class="n">xt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">zs</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">alfa</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span><span class="o">-</span><span class="n">y</span>
+        <span class="c1"># Calcula la norma :math:`hh^TQhh`</span>
+        <span class="n">aux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">distancias</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+        <span class="n">potencial</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">aux</span><span class="o">*</span><span class="n">distancias</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">potencial</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">ConfigICM</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Núcleo de todos los parámetros de configuración y constantes. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">configFile</span><span class="o">=</span><span class="s1">&#39;config_default.yaml&#39;</span><span class="p">,</span><span class="n">D</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">D</span><span class="p">:</span>
+            <span class="n">arch</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">Data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">arch</span><span class="p">,</span><span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+            <span class="n">D</span><span class="o">=</span><span class="n">Data</span><span class="p">[</span><span class="s1">&#39;D&#39;</span><span class="p">]</span>
+            
+
+        <span class="c1"># parámetros por default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span>  <span class="c1">#cantidad de iteraciones de ICM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltat</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;deltat&#39;</span><span class="p">]</span>  <span class="c1">#periodo de muestreo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;L&#39;</span><span class="p">]</span>  <span class="c1">#cota superior de la cantidad de objetos (max landmarks)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="c1">#matriz de covarianza de las observaciones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1">#matriz de covarianza del motion model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cte_odom</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;cte_odom&#39;</span><span class="p">]</span>  <span class="c1">#S=diag([cte_odom,cte_odom,cte_odom]) matriz de peso de los datos odométricos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cota</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;cota&#39;</span><span class="p">]</span>  <span class="c1">#cantidad de veces que hay q ver un arbol para q se considere un arbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;dist_thr&#39;</span><span class="p">]</span>  <span class="c1">#distancia máxima para que dos obs sean consideradas del mismo objeto</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_thr_obs</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;dist_thr_obs&#39;</span><span class="p">]</span>  <span class="c1">#distancia máxima para que dos obs sean consideradas del mismo objeto en el proceso de filtrado de las observaciones</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rango_laser_max</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;rango_laser_max&#39;</span><span class="p">]</span>  <span class="c1">#alcance máximo del laser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radio</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;radio&#39;</span><span class="p">]</span> <span class="c1">#radio promedio de los árboles</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;topic&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">=</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">set_Tf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Tf</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Tf</span><span class="o">=</span><span class="n">Tf</span>  <span class="c1">#cantidad total de periodos de muestreo</span>
+
+<span class="k">class</span> <span class="nc">Mapa</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Esta clase define los metodos utilizados para mapear y refinar un mapa.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">):</span>
+        <span class="c1"># Parámetros de configuracion inicial</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">L</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cota</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">cota</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dist_thr</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">landmarks_actuales</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_obs</span><span class="p">()</span> 
+        <span class="c1">#self.mapa=np.zeros((2,config.L)) #guarda la posicion de los a lo sumo L arboles del entorno</span>
+    
+    <span class="k">def</span> <span class="nf">clear_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicialización de variables internas</span>
+
+<span class="sd">        self.cant_obs_i=np.zeros(self.L)  #guarda la cantidad de veces que se observó el i-ésimo árbol</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cant_obs_i</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>  <span class="c1">#guarda la cantidad de veces que se observó el i-ésimo árbol</span>
+
+    <span class="k">def</span> <span class="nf">actualizar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mapa</span><span class="p">,</span><span class="n">mapa_referencia</span><span class="p">,</span><span class="n">obs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        actualizar(self,mapa,mapa_referencia,obs)</span>
+<span class="sd">        </span>
+<span class="sd">        Actualiza las variables relacionadas con la construcción del mapa.</span>
+<span class="sd">        Como argumentos de entrada son el mismo mapa y las observaciones de una sola</span>
+<span class="sd">        medicion.</span>
+<span class="sd">        </span>
+<span class="sd">    </span>
+<span class="sd">        Parámetros:</span>
+<span class="sd">        -----------</span>
+<span class="sd">    </span>
+<span class="sd">        Entradas: mapa, mapa_referencia, obs</span>
+<span class="sd">        &#39;Externas&#39;</span>
+<span class="sd">         - [2 x Lact] Mapa: Es una matriz con las posiciones 2D de todos árboles.</span>
+<span class="sd">         - yy o mapa_referencia: Es el mapa de referencia, que NO se modifca.</span>
+<span class="sd">         - [(x,y) x Nobs] obs: Lista de observaciones en coordenadas cartecianas.</span>
+<span class="sd">           Nobs son la cantidad de observaciones filtradas (sin outliers). </span>
+<span class="sd">         &#39;Internas&#39;</span>
+<span class="sd">         - [int] Lact: cantidad de árboles hasta el momento (Landmarks</span>
+<span class="sd">           activos/actuales)</span>
+
+<span class="sd">        Salidas: mapa,c</span>
+<span class="sd">        &#39;Externas&#39;</span>
+<span class="sd">         - [2 x Lact] Mapa: Es una matriz con las posiciones 2D de &#39;Lact&#39; árboles.</span>
+<span class="sd">         - vector de etiquetas &#39;c&#39;: Vector de etiquetas de cada landmark. Dice a que landmark</span>
+<span class="sd">           corresponde cada medición.</span>
+<span class="sd">        &#39;Internas&#39;</span>
+<span class="sd">         - int [1 x Lact] cant_obs_i: Conteo de la cantidad de veces que se observo</span>
+<span class="sd">           un árbol.</span>
+<span class="sd">         - [int] Lact: cantidad de árboles actualizado.</span>
+
+<span class="sd">        Mapa es la estimación de los árboles que se tiene hasta el momento dentro de la iteracion ICM.</span>
+<span class="sd">        **yy** es la estimación de los árboles que se usará para realizar el etiquetado de las obs nuevas. </span>
+<span class="sd">        En la iteracion 0 yy=mapa, pero en las iteraciones siguientes yy es el mapa final estimado en la iteración ICM</span>
+<span class="sd">        anterior.</span>
+<span class="sd">        </span>
+<span class="sd">        #actualizo (o creo) ubicación de arboles observados</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Lact</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">landmarks_actuales</span>
+        <span class="n">cant_obs_i</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cant_obs_i</span>
+
+        <span class="k">if</span> <span class="n">Lact</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span><span class="c1">#este bucle es solamente para t=0 de la iteración ICM 0</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">fcluster</span><span class="p">(</span><span class="n">linkage</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">obs</span><span class="p">)),</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>  <span class="c1">#calculo clusters iniciales</span>
+            <span class="n">Lact</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>  <span class="c1">#cantidad de arboles iniciales</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Lact</span><span class="p">):</span>
+                <span class="n">mapa</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="c1">#calculo el centro de cada cluster</span>
+                <span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">])</span>
+    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#me fijo si las observaciones corresponden a un arbol existente</span>
+            <span class="n">distancias</span><span class="o">=</span><span class="n">cdist</span><span class="p">(</span><span class="n">mapa_referencia</span><span class="p">[:,:</span><span class="n">Lact</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">obs</span><span class="p">)</span><span class="c1">#matriz de distancias entre yy y las obs nuevas</span>
+            <span class="n">min_dist</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">distancias</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="c1">#distancia minima desde cada obs a un arbol de yy</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">distancias</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="c1">#etiqueta del arbol de yy que minimiza la distancia a cada obs nueva</span>
+            <span class="n">c</span><span class="p">[</span><span class="n">min_dist</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span><span class="c1">#si esta lejos de los arboles de yy le asigno la etiqueta -1 momentaneamente</span>
+            <span class="c1">#armo cluster con observaciones de arboles nuevos</span>
+            <span class="n">ztt</span><span class="o">=</span><span class="n">obs</span><span class="p">[</span><span class="n">min_dist</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">,:]</span><span class="c1">#extraigo las obs nuevas que estan lejos de los árboles de yy</span>
+            <span class="k">if</span> <span class="n">ztt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span><span class="c1">#si hay mas de una observacion de un arbol no mapeado aun</span>
+                <span class="n">cc</span><span class="o">=</span><span class="n">Lact</span><span class="o">+</span><span class="n">fcluster</span><span class="p">(</span><span class="n">linkage</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">ztt</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])),</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="c1">#calculo clusters y le coloco una etiqueta nueva (a partir de Lact=max etiqueta+1)</span>
+                <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">cc</span><span class="c1">#a todos los árboles con etiqueta -1 le asigno su nueva etiqueta</span>
+    
+            <span class="k">elif</span> <span class="n">ztt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span><span class="c1">#si hay sólo una observacion de un arbol no mapeado aun</span>
+                <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">Lact</span>
+    
+            <span class="n">Lact</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">Lact</span><span class="p">))</span><span class="c1">#actualizo la cantidad de arboles mapeados hasta el momento</span>
+            <span class="c1">#actualizo (o creo) ubicación de arboles observados</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Lact</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="c1">#mapa[:,i]=np.sum(zt[c==i,2:4],axis=0)/(cant_obs_i[i]+len(c[c==i]))\</span>
+                    <span class="c1">#        +mapa[:,i]*cant_obs_i[i]/(cant_obs_i[i]+len(c[c==i]))</span>
+    
+                    <span class="c1">#                obs o zt?</span>
+                    <span class="n">mapa</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">]))</span>\
+                            <span class="o">+</span><span class="n">mapa</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">]))</span>
+                    
+                    <span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">landmarks_actuales</span><span class="o">=</span><span class="n">Lact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cant_obs_i</span><span class="o">=</span><span class="n">cant_obs_i</span>
+    
+        <span class="k">return</span> <span class="n">mapa</span><span class="p">,</span><span class="n">c</span>
+
+
+    <span class="k">def</span> <span class="nf">filtrar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mapa</span><span class="p">):</span>
+       <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       [y,cant_obs_i,Lact]=filtrar_y(y,cant_obs_i)</span>
+<span class="sd">       </span>
+<span class="sd">       Se filtra el mapa, eliminando landmarks poco observados y unificando</span>
+<span class="sd">       landmarks cercanos. </span>
+<span class="sd">       </span>
+<span class="sd">       Parámetros</span>
+<span class="sd">       ----------</span>
+<span class="sd">    </span>
+<span class="sd">       Entradas: mapa</span>
+<span class="sd">       &#39;Externas&#39;</span>
+<span class="sd">        - y o mapa: Mapa de entrada</span>
+<span class="sd">       </span>
+<span class="sd">       &#39;Internas&#39;</span>
+<span class="sd">        - cant_obs_i: Cantidad de veces que se observo cada árbol ordenados por su</span>
+<span class="sd">          índice</span>
+<span class="sd">    </span>
+<span class="sd">       Salidas: mapa_filtrado</span>
+<span class="sd">       &#39;Externas&#39;</span>
+<span class="sd">        - yy o mapa_filtrado: mapa filtrado con los árboles más observados</span>
+<span class="sd">       &#39;Internas&#39;</span>
+<span class="sd">        - cant_obs_i: Cantidad de observaciones luego de filtrar </span>
+<span class="sd">       &quot;&quot;&quot;</span>
+       <span class="n">Lact</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">landmarks_actuales</span> 
+       <span class="n">cant_obs_i</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cant_obs_i</span>
+
+       <span class="n">cant_obs_i</span><span class="o">=</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">Lact</span><span class="p">]</span> <span class="c1">#saco ceros innecesarios</span>
+       <span class="n">ind</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">cota</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">#indices de arboles poco observados</span>
+       <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>  <span class="c1">#si hay arboles poco observados</span>
+           <span class="n">Lact</span><span class="o">=</span><span class="n">Lact</span><span class="o">-</span><span class="n">ind</span><span class="o">.</span><span class="n">size</span>  <span class="c1">#reduzco la cantidad de arboles observados hasta el momento</span>
+           <span class="n">ind2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">cota</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#indices de arboles observados muchas veces</span>
+           <span class="n">mapa</span><span class="o">=</span><span class="n">mapa</span><span class="p">[:,</span><span class="n">ind2</span><span class="p">]</span> <span class="c1">#elimino las posiciones estimadas de los arboles vistos pocas veces</span>
+           <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">mapa</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)))),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1">#le devuelvo a y su dimension original completando con ceros</span>
+           <span class="n">cant_obs_i</span><span class="o">=</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">ind2</span><span class="p">]</span> <span class="c1">#elimino las cantidades observadas de los arboles vistos pocas veces</span>
+    
+       <span class="n">a</span><span class="o">=</span><span class="n">squareform</span><span class="p">(</span><span class="n">pdist</span><span class="p">(</span><span class="n">mapa</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="n">Lact</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>  <span class="c1">#calculo la matriz de distancias 2a2 de todas las posiciones de arboles observados</span>
+       <span class="n">a</span><span class="p">[</span><span class="n">a</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="c1">#reemplazo los ceros (de la diagonal generalmente) para que no interfiera en el calculo de minimos en las siguientes lineas</span>
+       <span class="n">b</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#vector que contiene contiene el valor j en la entrada i, si el arbol j es el más cercano al arbol i</span>
+       <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#vector que contiene la distancia minima entre los arboles i y j de la linea anterior</span>
+       <span class="n">ind</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">a</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_thr</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#indices donde la distancia entre dos arboles es muy chica</span>
+       <span class="n">c</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Lact</span><span class="p">)</span>  <span class="c1">#contiene los indices de los arboles</span>
+       <span class="k">if</span> <span class="n">ind</span><span class="o">.</span><span class="n">size</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>  <span class="c1">#si hay arboles muy cercanos los unifico</span>
+           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)):</span> <span class="c1">#el arbol ind[i] tiene al arbol b[ind[i]] muy cercano</span>
+               <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">c</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]]]</span><span class="o">=</span><span class="n">c</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>  <span class="c1">#le asigno al arbol b[ind[i]] (y a todos los cercanos a él) el indice del arbol ind[i]</span>
+    
+       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Lact</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">])</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>  <span class="c1">#si el arbol i perdió su indice por ser cercano a uno de indice menor</span>
+               <span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">c</span><span class="p">[</span><span class="n">c</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="c1">#a todos los de indice mayor a i le resto 1... ya que el indice i ya no existe</span>
+    
+       <span class="n">Lact</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span> <span class="c1">#actualizo la cantidad de arboles observados luego del filtro</span>
+       <span class="n">mapa_filtrado</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">))</span> <span class="c1">#contendrá la posición media ponderada de acuerdo a cant_obs_i entre todos los arboles unificados por estar cercanos </span>
+       <span class="n">cant_obs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>  <span class="c1">#reemplazará a cant_obs_i</span>
+       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Lact</span><span class="p">):</span>
+           <span class="n">cant_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">])</span>
+           <span class="n">mapa_filtrado</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mapa</span><span class="p">[:,</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">matlib</span><span class="o">.</span><span class="n">repmat</span><span class="p">(</span><span class="n">cant_obs_i</span><span class="p">[</span><span class="n">c</span><span class="o">==</span><span class="n">i</span><span class="p">],</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">cant_obs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1">#calculo el centro de cada nuevo cluster</span>
+       
+       <span class="bp">self</span><span class="o">.</span><span class="n">landmarks_actuales</span><span class="o">=</span><span class="n">Lact</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">cant_obs_i</span><span class="o">=</span><span class="n">cant_obs</span>
+
+       <span class="k">return</span> <span class="n">mapa_filtrado</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/icm_slam.html">ICM SLAM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sphinx.html">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

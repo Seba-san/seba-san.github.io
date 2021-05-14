@@ -2,3 +2,219 @@
 
 ICM SLAM
 ===================
+
+La idea de este modulo es poder configurar el slam desde *external_options.py* y *config_default.yaml*. 
+
+external_options
+-----------------
+
+En este archivo se define la estructura del programa principal y se ejecutan los modulos de *ICM_SLAM.py*. Para un correcto funcionamiento es encesario definir:
+
+**g**: Ec. cinemática del vehículo. Definida en :cite:label:`gimenez2018`. 
+   
+
+.. code-block:: python 
+ 
+ def g(self, xt,ut):
+     xt=xt.reshape((3,1))
+     ut=ut.reshape((2,1))
+     S=np.array([[(np.cos(xt[2]))[0],0.0],
+         [np.sin(xt[2])[0],0.0],
+         [0.0,1.0]])
+     gg=xt+self.config.deltat*np.matmul(S,ut).reshape((3,1))
+     return gg
+
+
+**h**: Ec. de medición. Definida en :cite:label:`gimenez2018`. Poner un ejemplo de implementación.
+
+.. code-block:: python
+
+
+    def h(self, xt,zt):
+        y=self.mapa_visto
+        alfa=zt[:,1]+xt[2]-np.pi/2.0
+        zc=zt[:,0]*np.cos(alfa)
+        zs=zt[:,0]*np.sin(alfa)
+        # Resta la posicion de cada punto al mapa "visto". (y no es todo el mapa,
+        # solo la parte matcheada en "actualizar mapa")
+        distancias=np.concatenate((xt[0]+zc,xt[1]+zs)).reshape((len(alfa),2),order='F')-y
+        # Calcula la norma :math:`hh^TQhh`
+        aux=np.matmul(distancias,self.config.Q)
+        potencial=np.sum(aux*distancias)
+        return potencial
+
+
+Optativamente
+************** 
+
+**fun_x**: Es el argumento de la función definido en la Ec. (11) de :cite:label:`gimenez2018`. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal **causal** (que depende solo del tiempo actual y de los pasados). Ya que se ejecutará en la etapa de inicialización **online**. 
+
+ .. code-block:: python
+
+
+    def fun_x(self,x):
+        """
+        Argumento de la Ec. (11) del paper.
+
+        Función a minimizar que depende de:
+         - Odometria
+         - Estimacion de pose anterior
+         - Modelo cinemático de movimiento
+         - Modelo de las observaciones
+         - Observaciones en un instate dado
+        
+        Parámetros
+        -----------
+        
+        Entrada:
+         - x: posición.
+
+        Salida:
+         - f: potencial energético.
+
+        """
+
+        z=self.medicion_actual
+        x_ant=self.x_ant_opt
+        u_ant=self.u_ant_opt
+        odo=self.odo_opt
+        # vector desplazamiento entre las estimacion de pose anterior y la pose
+        # actual X.
+        gg=x.reshape((3,1))-self.g(x_ant,u_ant)
+        gg[2]=entrepi(gg[2])
+
+        hh=self.h(x,z)
+        Rotador=Rota(x_ant[2][0])
+        ooo=np.zeros((3,1))
+        # Calcula la diferencia entre los vectores desplazamiento. Entre la
+        # odometria y la pose x (de forma relativa, con respecto a la pose anterior)
+        # Ec. (16) del paper.
+        ooo[0:2]=np.matmul(Rota(odo[2,0]),(odo[0:2,1]-odo[0:2,0]).reshape((2,1)))\
+                -np.matmul(Rotador,x[0:2].reshape((2,1))-x_ant[0:2])
+        
+        ooo[2]=odo[2,1]-odo[2,0]-x[2]+x_ant[2]
+        ooo[2]=entrepi(ooo[2])
+
+        f=np.matmul(np.matmul(gg.T,self.config.R),gg)+\
+           hh+\
+           self.config.cte_odom*np.matmul(ooo.T,ooo)
+        return f
+
+**fun_xn**: Es el argumento de la función definido en la Ec. (14) de :cite:label:`gimenez2018`. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal. Ya que se ejecutará en la etapa de optimizacion **offline**. En general dicha función puede incluir en su calculo la salida de la funcion *fun_x*. 
+
+.. code-block:: python
+
+
+    def fun_xn(self,x):
+        """
+        Función a minimizar. 
+
+        Parte del argumento de la Ec. (14) del papaer. Esta función incluye a
+        fun_x, ya que usa la información previa (fun_x) e información futura.
+        En este codigo solo se incorpora la información futura. 
+
+        Entrada:
+         - x: Pose
+
+        Salida:
+         - f: Potencial energético debido al modelo cinemático y a la
+           odometría.
+        """
+        x_pos=self.x_pos_opt
+        u_act=self.u_act_opt
+        odo=self.odo_opt
+
+        f=self.fun_x(x)
+
+        x=x.reshape((3,1))
+        gg=self.g(x,u_act)-x_pos
+        gg[2]=entrepi(gg[2])
+
+        Rotador=Rota(x[2][0])
+        ooo=np.zeros((3,1))
+        # Calcula la diferencia entre los vectores desplazamiento. Entre la
+        # odometria y la pose x (de forma relativa, con respecto a la pose anterior)
+        # Ec. (16) del paper.
+        ooo[0:2]=np.matmul(Rota(odo[2,1]),(odo[0:2,2]-odo[0:2,1]).reshape((2,1)))\
+                -np.matmul(Rotador,x_pos[0:2]-x[0:2])
+
+        ooo[2]=odo[2,2]-odo[2,1]-x_pos[2]+x[2]
+        ooo[2]=entrepi(ooo[2])
+
+        f=np.matmul(np.matmul(gg.T,self.config.R),gg)\
+           +self.config.cte_odom*np.matmul(ooo.T,ooo)\
+           +f
+        return f
+
+
+
+config_default.yaml
+--------------------
+
+En este archivo se definen los parámetros de configuración del sistema. A continuación se pone una copia de los datos utilizados en  :cite:label:`gimenez2018`.
+
+.. code-block:: yaml
+    :name: config_default.yaml
+
+    D:
+        N: 2
+        deltat: 0.1
+        L: 1000  
+        Q: [1,1]
+        R: [1,1,1] 
+        cte_odom: 1.0  
+        cota: 300.0  
+        dist_thr: 1.0  
+        dist_thr_obs: 1  
+        rango_laser_max: 10.0  
+        radio: 0.137 
+
+Definiciones
+*************
+
+ - N: Cantidad de iteraciones ICM.
+ - deltat: Periodo de muestreo. 
+ - Tf: Cantidad total de periodos de muestreo.
+ - L: cota superior de la cantidad de objetos (max landmarks).
+ - Q: Diagonal de la matriz que define la norma de las observaciones.
+ - R: Diagonal de la matriz que define la norma del modelo de moviemiento.
+ - S: Diagonal de la matriz que define la norma de la odometría.
+ - cota: Cantidad de veces que hay que ver un árbol para q se considere un árbol.
+ - dist_thr: Distancia máxima para que dos obs sean consideradas del mismo objeto.
+ - dist_thr_obs: Distancia máxima para que dos obs sean consideradas del mismo objeto en el proceso de filtrado de las observaciones.
+ - rango_laser_max: Alcance máximo del laser.
+ - radio: Radio promedio de los árboles.
+
+Implementaciones
+----------------
+En la actualidad se encuentra implementado el codigo en python para un dataset offline almacenado en un archivo .mat . En la brevedad se terminará de desarrollar el código para correrlo en una red ROS. 
+
+ - Para mayor informacion ir a la rama *master* del repositorio.
+ - En la rama *ros_package* se encuentra el desarrollo de la implementacion en la red ROS.
+
+
+.. .. autoclass:: ICM_SLAM.scripts.ICM_SLAM.ICM_method
+    :members:
+    :undoc-members:
+
+
+.. .. autofunction:: ICM_SLAM.scripts.funciones_varias
+  
+ 
+
+ 
+
+
+
+.. .. autosummary::
+   :toctree:  _autosummary
+   :recursive:
+   
+   ICM_SLAM.scripts.ICM_SLAM
+
+
+
+.. .. toctree::
+    
+
+    modularTree_code

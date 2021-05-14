@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICM_SLAM.scripts.funciones_varias &#8212; documentación de Dynamic World - 0.2.0</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/translations.js"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para ICM_SLAM.scripts.funciones_varias</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">pdist</span><span class="p">,</span> <span class="n">squareform</span><span class="p">,</span> <span class="n">cdist</span>
+
+<div class="viewcode-block" id="entrepi"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.entrepi">[documentos]</a><span class="k">def</span> <span class="nf">entrepi</span><span class="p">(</span><span class="n">angulo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    retorna el ángulo equivalente entre -pi y pi</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">angulo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">angulo</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">angulo</span><span class="o">&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+      <span class="n">angulo</span><span class="o">=</span><span class="n">angulo</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    
+    <span class="k">return</span> <span class="n">angulo</span></div>
+
+<div class="viewcode-block" id="tras_rot_z"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.tras_rot_z">[documentos]</a><span class="k">def</span> <span class="nf">tras_rot_z</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     - Rota y traslada las observaciones de acuerdo a la pose actual</span>
+<span class="sd">     - Transforma del body frame al global frame</span>
+
+<span class="sd">    :math:`x_t=[ x_{t,x}, x_{t,y}, x_{t,\theta}]^T` </span>
+<span class="sd">    :math:`z_i=\{z_{t,i}:i=1,\cdots,n_t\}` :math:`z_{t,i}=[ z_{t,i,d}, z_{t,i,\theta} ]^T`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">ct</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">st</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">ct</span><span class="p">,</span><span class="n">st</span><span class="p">],[</span><span class="o">-</span><span class="n">st</span><span class="p">,</span><span class="n">ct</span><span class="p">]])</span>
+    <span class="n">z</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">z</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span><span class="n">R</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">matlib</span><span class="o">.</span><span class="n">repmat</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">z</span></div>
+
+<div class="viewcode-block" id="Rota"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.Rota">[documentos]</a><span class="k">def</span> <span class="nf">Rota</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Arma la matriz de rotación en 2D a partir de un ángulo en *radianes*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+        <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)]])</span>
+    <span class="k">return</span> <span class="n">A</span></div>
+
+<div class="viewcode-block" id="calc_cambio"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.calc_cambio">[documentos]</a><span class="k">def</span> <span class="nf">calc_cambio</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">mapa_viejo</span><span class="p">):</span>
+    <span class="n">min_dist</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">cdist</span><span class="p">(</span><span class="n">mapa_viejo</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">y</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cambio_minimo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">min_dist</span><span class="p">)</span>
+    <span class="n">cambio_maximo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">min_dist</span><span class="p">)</span>
+    <span class="n">cambio_medio</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">min_dist</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cambio_minimo</span><span class="p">,</span><span class="n">cambio_maximo</span><span class="p">,</span><span class="n">cambio_medio</span></div>
+
+<div class="viewcode-block" id="graficar"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.graficar">[documentos]</a><span class="k">def</span> <span class="nf">graficar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">yy</span><span class="p">,</span><span class="n">odometria</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> 
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">odometria</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">odometria</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">yy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">yy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b*&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span></div>
+    <span class="c1">#plt.show()</span>
+
+<div class="viewcode-block" id="graficar_cambio"><a class="viewcode-back" href="../../../rst/icm_slam.html#ICM_SLAM.scripts.funciones_varias.graficar_cambio">[documentos]</a><span class="k">def</span> <span class="nf">graficar_cambio</span><span class="p">(</span><span class="n">cambios_minimos</span><span class="p">,</span><span class="n">cambios_maximos</span><span class="p">,</span><span class="n">cambios_medios</span><span class="p">):</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> 
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cambios_minimos</span><span class="p">,</span> <span class="s1">&#39;b--&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cambios_maximos</span><span class="p">,</span> <span class="s1">&#39;b--&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cambios_medios</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Dynamic World</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+<p class="caption"><span class="caption-text">Contenido:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/pioneer2dx.html">Pioneer2dx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/campo.html">Campo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sm_bk.html">Slam Benchmark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/icm_slam.html">ICM SLAM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/sphinx.html">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Sansoni S..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

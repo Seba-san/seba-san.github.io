@@ -1,0 +1,30 @@
+﻿ICM\_SLAM.scripts.funciones\_viejas
+===================================
+
+.. automodule:: ICM_SLAM.scripts.funciones_viejas
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      actualizar_mapa
+      filtrar_y
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
