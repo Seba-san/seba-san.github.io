@@ -193,6 +193,48 @@ En la actualidad se encuentra implementado el codigo en python para un dataset o
  - En la rama *ros_package* se encuentra el desarrollo de la implementacion en la red ROS.
 
 
+Procedimiento
+--------------
+
+Este package no es propiamente un package de ROS, ya que no requiere tener inicializado el entorno. Para usar los scripts con la red ROS se requiere estar corriendo en *ros-master* el modulo `rosbridge <http://wiki.ros.org/rosbridge_suite>`_. Una vez instalado este modulo ejecutar:
+
+.. code-block:: bash
+
+    roslaunch rosbridge_server rosbridge_websocket.launch
+
+A modo de resumen, rosbridge es una inteerfaz de ROS que permite conectar a la red programas que no contienen modulos de ROS. En este caso se utiliza la libreria `roslibpy <https://roslibpy.readthedocs.io/en/latest/>`_ ya que permite conectar códigos escritos en python 3.xx a ROS (ROS funciona con python 2.7). 
+
+Una vez inicializado *rosbridge* el modulo *sensors.py* busca conectarse a la red ROS y accede a los topics de los sensores. Por defecto busca el topic del laser y de la odometria, los cuales deben especificarse en el archivo de configuración *config_ros.yaml* en *topic_laser* y *topic_odometry* respectivamente.
+
+El software no diferencia si los datos vienen de una simulación que esta corriendo, si son datos de un robot que está compartiendo los datos de sus sensores via streaming, o son datos grabados en un archivo *.bag*. Por este motivo en esta ocasión se utiliza la última opción. 
+
+Aún no está implementada la posibilidad de de ejecutar un *.bag* sin tener funcionando la red ROS. Con lo cual, se requiere tener instalado ROS para ejecutar el siguiente comando:
+
+.. code-block:: bash
+
+    rosbag play slam_benchmark/bags/laser_data.bag
+
+Asumiendo que el *PWD* está en la carpeta *src* del *workspace*. Luego lanzar el script haciendo:
+
+
+.. code-block:: bash
+
+    source ICM_SLAM/scripts/env/bin/activate
+    python ICM_SLAM/scripts/sensors.py
+
+
+Funcionamiento script sensors.py
+----------------------------------
+
+Este script se subscribe a los topics antes dichos y genera un servicio que habilita las iteraciones ICM. (Esto se podrá implementar en un futuro con  `ActionLib <http://wiki.ros.org/actionlib>`_ más info en `ActionLib Detailed Description. <http://wiki.ros.org/actionlib/DetailedDescription>`_).
+
+Básicamente el comportamiento del servicio es que mediante el comando "start", comienza a iterar la cantidad de veces especificadas en el *.yaml* y luego devuelve el mapa y la trayectoria del vehículo. 
+
+
+
+
+
+
 .. .. autoclass:: ICM_SLAM.scripts.ICM_SLAM.ICM_method
     :members:
     :undoc-members:

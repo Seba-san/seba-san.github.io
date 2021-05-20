@@ -109,7 +109,43 @@ sencillo modificarlo desde el archivo xml <a class="reference internal" href="mo
 <h2>Launch files<a class="headerlink" href="#launch-files" title="Enlazar permanentemente con este título">¶</a></h2>
 <p>Los launch files sirven para juntar todas las configuraciones en un solo archivo y lanzarlas con un solo comando (roslaunch).
 Ejemplo de uso: ……………………..</p>
-<p>Dentro de estos launch files, estan los que <em>lanzan</em> todo el entorno de simulación y los que <em>enmascaran</em> un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar.</p>
+<p>Dentro de estos launch files, estan los que <em>lanzan</em> todo el entorno de simulación y los que <em>enmascaran</em> un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar. Para más información visitar <a class="reference external" href="http://wiki.ros.org/roslaunch/XML/">roslaunch/XML</a> .</p>
+</div>
+<div class="section" id="lista-de-launchs-files-predefinidos">
+<h2>Lista de launchs files predefinidos<a class="headerlink" href="#lista-de-launchs-files-predefinidos" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Todos los mapas parten con la configuración básica definida en el archivo base_v4.world (poner link para verlo).
+Luego la definición del entorno está definida en los siguientes archivos:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Limpio</p></li>
+<li><p>Plantación ordenada</p></li>
+<li><p>Complex Surface</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="procedimiento">
+<h2>Procedimiento<a class="headerlink" href="#procedimiento" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Pararse en la carpeta del modulo pioneer2dx y en cada terminal poner:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ws/devel/setup.bash
+</pre></div>
+</div>
+<p>Luego para lanzar la simulación:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>roslaunch pioneer2dx plantacion_ordenada.launch
+</pre></div>
+</div>
+<p>Para lanzar el controlador y manipular el robot:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python scripts/differential_controller.py
+</pre></div>
+</div>
+<p>Para ver la data que generan los sensores en tiempo real, lanzar <em>rviz</em>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosrun rviz rviz -d config/rviz_config2.rviz
+</pre></div>
+</div>
+<p>Para grabar los datos generados hacer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>roslaunch pioneer2dx lidar_bag.launch
+</pre></div>
+</div>
+<p>El <em>.bag</em> generado se almacena en <em>slam_benchmark/bags/laser_data.bag</em> listo para ser analizado. CUIDADO: el archivo creado sobrescribe el archivo anterior si este existe. (numerar los archivos generados? esto genera un problema para el código de slam_bencmark…)</p>
 </div>
 </div>
 
@@ -138,6 +174,8 @@ Ejemplo de uso: ……………………..</p>
 <li class="toctree-l2"><a class="reference internal" href="#odometria">Odometría</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#grountruth">Grountruth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#launch-files">Launch files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lista-de-launchs-files-predefinidos">Lista de launchs files predefinidos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#procedimiento">Procedimiento</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="campo.html">Campo</a></li>

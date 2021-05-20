@@ -211,6 +211,30 @@
 </ul>
 </div></blockquote>
 </div>
+<div class="section" id="procedimiento">
+<h2>Procedimiento<a class="headerlink" href="#procedimiento" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Este package no es propiamente un package de ROS, ya que no requiere tener inicializado el entorno. Para usar los scripts con la red ROS se requiere estar corriendo en <em>ros-master</em> el modulo <a class="reference external" href="http://wiki.ros.org/rosbridge_suite">rosbridge</a>. Una vez instalado este modulo ejecutar:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>roslaunch rosbridge_server rosbridge_websocket.launch
+</pre></div>
+</div>
+<p>A modo de resumen, rosbridge es una inteerfaz de ROS que permite conectar a la red programas que no contienen modulos de ROS. En este caso se utiliza la libreria <a class="reference external" href="https://roslibpy.readthedocs.io/en/latest/">roslibpy</a> ya que permite conectar códigos escritos en python 3.xx a ROS (ROS funciona con python 2.7).</p>
+<p>Una vez inicializado <em>rosbridge</em> el modulo <em>sensors.py</em> busca conectarse a la red ROS y accede a los topics de los sensores. Por defecto busca el topic del laser y de la odometria, los cuales deben especificarse en el archivo de configuración <em>config_ros.yaml</em> en <em>topic_laser</em> y <em>topic_odometry</em> respectivamente.</p>
+<p>El software no diferencia si los datos vienen de una simulación que esta corriendo, si son datos de un robot que está compartiendo los datos de sus sensores via streaming, o son datos grabados en un archivo <em>.bag</em>. Por este motivo en esta ocasión se utiliza la última opción.</p>
+<p>Aún no está implementada la posibilidad de de ejecutar un <em>.bag</em> sin tener funcionando la red ROS. Con lo cual, se requiere tener instalado ROS para ejecutar el siguiente comando:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosbag play slam_benchmark/bags/laser_data.bag
+</pre></div>
+</div>
+<p>Asumiendo que el <em>PWD</em> está en la carpeta <em>src</em> del <em>workspace</em>. Luego lanzar el script haciendo:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ICM_SLAM/scripts/env/bin/activate
+python ICM_SLAM/scripts/sensors.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="funcionamiento-script-sensors-py">
+<h2>Funcionamiento script sensors.py<a class="headerlink" href="#funcionamiento-script-sensors-py" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Este script se subscribe a los topics antes dichos y genera un servicio que habilita las iteraciones ICM. (Esto se podrá implementar en un futuro con  <a class="reference external" href="http://wiki.ros.org/actionlib">ActionLib</a> más info en <a class="reference external" href="http://wiki.ros.org/actionlib/DetailedDescription">ActionLib Detailed Description.</a>).</p>
+<p>Básicamente el comportamiento del servicio es que mediante el comando «start», comienza a iterar la cantidad de veces especificadas en el <em>.yaml</em> y luego devuelve el mapa y la trayectoria del vehículo.</p>
+</div>
 </div>
 
 
@@ -239,6 +263,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#external-options">external_options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#config-default-yaml">config_default.yaml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#implementaciones">Implementaciones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#procedimiento">Procedimiento</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#funcionamiento-script-sensors-py">Funcionamiento script sensors.py</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="sphinx.html">Explicacion de como documentar usando las librerias de <em>Sphinx</em></a></li>

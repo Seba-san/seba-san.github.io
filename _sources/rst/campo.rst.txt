@@ -109,3 +109,10 @@ Modificación de un xml existente
 La idea de este conjunto de herramientas es tomar un mundo ya creado y sumarle cosas, como maleza o suelo. La estructura es similar a los visto antes en #generacion-autimatica-de-xml, con la diferencia de que los modelos no se modifican, solo se copian con distintas poses, escalas y cantiades.
 
 .. image:: modify_world_diagram.png
+
+
+Lista de mapas predefinidos
+---------------------------
+
+ - Complex Surface
+ - Dynamic World

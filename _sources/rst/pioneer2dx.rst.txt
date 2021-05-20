@@ -101,6 +101,49 @@ Launch files
 Los launch files sirven para juntar todas las configuraciones en un solo archivo y lanzarlas con un solo comando (roslaunch).
 Ejemplo de uso: ..........................
 
-Dentro de estos launch files, estan los que *lanzan* todo el entorno de simulación y los que *enmascaran* un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar. 
+Dentro de estos launch files, estan los que *lanzan* todo el entorno de simulación y los que *enmascaran* un conjunto de comandos que son incomodos de escribir en la terminal cada vez que se requiera utilizar. Para más información visitar `roslaunch/XML <http://wiki.ros.org/roslaunch/XML/>`_ .
+
+Lista de launchs files predefinidos
+------------------------------------
+
+Todos los mapas parten con la configuración básica definida en el archivo base_v4.world (poner link para verlo).
+Luego la definición del entorno está definida en los siguientes archivos:
+
+ - Limpio
+ - Plantación ordenada
+ - Complex Surface
 
 
+Procedimiento
+-------------
+Pararse en la carpeta del modulo pioneer2dx y en cada terminal poner:
+
+.. code-block:: bash
+
+    source ws/devel/setup.bash
+
+Luego para lanzar la simulación:
+
+.. code-block:: bash
+
+    roslaunch pioneer2dx plantacion_ordenada.launch
+
+Para lanzar el controlador y manipular el robot:
+
+.. code-block:: bash
+
+    python scripts/differential_controller.py 
+
+Para ver la data que generan los sensores en tiempo real, lanzar *rviz*:
+
+.. code-block:: bash
+
+    rosrun rviz rviz -d config/rviz_config2.rviz
+
+Para grabar los datos generados hacer:
+
+.. code-block:: bash
+
+    roslaunch pioneer2dx lidar_bag.launch
+
+El *.bag* generado se almacena en *slam_benchmark/bags/laser_data.bag* listo para ser analizado. CUIDADO: el archivo creado sobrescribe el archivo anterior si este existe. (numerar los archivos generados? esto genera un problema para el código de slam_bencmark...)  
