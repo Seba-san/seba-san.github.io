@@ -8,7 +8,7 @@ Instalación ICM_SLAM + ROS
 A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS.
 
  - Inicialmente es necesario instalar `Docker <https://docs.docker.com/get-docker/>`_  
- - Descargar la última versión de la `implementación en ros <https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file>`_
+ - Descargar la última versión de la `ROS_bridge_docker <https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file>`_
  - Descomprima el archivo .zip descargado. Abra una terminal del sistema operativo y dirijase a la carpeta en donde descomprimió el archivo.
 
  - Luego ingrese el siguiente comando:
@@ -56,7 +56,7 @@ Ahora ya se esta en condiciones de ejecutar cualquier archivo .bag, por ejemplo 
 
 Esto reproducirá la grabación almacenada en *data.bag* . Si preciona la tecla *space* la repdocucción se pausará. Si preciona la combinación de teclas *ctrl+c* se corta la reproducción.
 
-Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo *icm_slam*. Para esto descargar la última versión disponible en `icm_slam <https://www.mediafire.com/file/yi6tg57fel15laz/ros_bridge_v2_1.zip/file>`_ e instalar `Python 3 <https://www.python.org/downloads/>`_ si es que no lo tiene aún. Luego siga las siguientes instrucciones:
+Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo *icm_slam*. Para esto descargar la última versión disponible en `icm_slam <https://www.mediafire.com/file/sy6m4s0679psmrv/ros_bridge_v2_1.zip/file>`_ e instalar `Python 3 <https://www.python.org/downloads/>`_ si es que no lo tiene aún. Luego siga las siguientes instrucciones:
 
  - Descomprimir el archivo.
  - En la carpeta que descomprimió el archivo ejecutar los siguientes comandos para preparar el entorno de ejecución:
