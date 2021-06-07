@@ -35,11 +35,95 @@
             
   <div class="section" id="icm-slam">
 <span id="id1"></span><h1>ICM SLAM<a class="headerlink" href="#icm-slam" title="Enlazar permanentemente con este título">¶</a></h1>
+<div class="section" id="instalacion-icm-slam-ros">
+<h2>Instalación ICM_SLAM + ROS<a class="headerlink" href="#instalacion-icm-slam-ros" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Inicialmente es necesario instalar <a class="reference external" href="https://docs.docker.com/get-docker/">Docker</a></p></li>
+<li><p>Descargar la última versión de la <a class="reference external" href="https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file">implementación en ros</a></p></li>
+<li><p>Descomprima el archivo .zip descargado. Abra una terminal del sistema operativo y dirijase a la carpeta en donde descomprimió el archivo.</p></li>
+<li><p>Luego ingrese el siguiente comando.</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -t ros-bridge .
+</pre></div>
+</div>
+<p>Se van a descargar unos paquetes, esta operación puede tardar mucho tiempo. Depende de su velocidad de conexión.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Una vez que finalice el anterior paso, ejecutar:</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
+</pre></div>
+</div>
+<p>Este comando va a crear una red ROS funcionando en background. Es necesario que quede corriendo mientras se trabaja con ROS ya que además de generar un puente entre la virtualización (mediante Docker) y la maquina host, corre tambien <em>roscore</em>. Esta última aplicación es necesaria para que funcione ROS.
+Para desactivarlo, ingrese el siguiente comando:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose down
+</pre></div>
+</div>
+<p>En esta misma carpeta hay otra carpeta que se llama «bags». Esta es una carpeta compartida con la virtualizacion, los datos almacenados en la carpeta «bags» apareceran en la carpeta «/home» de la virtualizacion. Si desea compartir otra carperta debe modificar el archivo docker-compose.yml y en la linea donde dice «source: ./bags» rempleazar ./bags por la ruta de la carpeta que desea compartir.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Para reproducir un archivo <em>.bag</em> ejecutar en otra terminal:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it docker_ros-bridge_1 bash
+</pre></div>
+</div>
+</div></blockquote>
+<p>Luego, una vez dentro de la virtualización ingresar los siguientes comandos en orden:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /home
+<span class="nb">source</span> iniciar.sh
+</pre></div>
+</div>
+</div></blockquote>
+<p>Ahora ya se esta en condiciones de ejecutar cualquier archivo .bag, por ejemplo lo puede hacer de la siguiente manera:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosbag play data.bag
+</pre></div>
+</div>
+</div></blockquote>
+<p>Esto reproducirá la grabación almacenada en <em>data.bag</em> . Si preciona la tecla <em>space</em> la repdocucción se pausará. Si preciona la combinación de teclas <em>ctrl+c</em> se corta la reproducción.</p>
+<p>Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo <em>icm_slam</em>. Para esto descargar la última versión disponible en <a class="reference external" href="https://www.mediafire.com/file/yi6tg57fel15laz/ros_bridge_v2_1.zip/file">icm_slam</a> e instalar <a class="reference external" href="https://www.python.org/downloads/">Python 3</a> si es que no lo tiene aún. Luego siga las siguientes instrucciones:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Descomprimir el archivo.</p></li>
+<li><p>En la carpeta que descomprimió el archivo ejecutar los siguientes comandos para preparar el entorno de ejecución:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m venv env
+<span class="nb">source</span> env/bin/activate
+python -m pip install -U pip
+python3 -m pip install -r requisitos.txt
+</pre></div>
+</div>
+</div></blockquote>
+<p>Ya se esta en condiciones de ejecutar el algoritmo. Para esto, debe poner en funcionamiento la virtualización (mediante el comando <em>docker-compose up -d</em> ) , luego en la carpeta donde descomprimió ejecutar:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python example.bag
+</pre></div>
+</div>
+</div></blockquote>
+<p>Si todo funciona correctamente debería salir el mensaje: «Conectado a la red ROS».</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Cuando se comience a reproducir una base de datos, el código de python comenzará a recibir la información y creará una imagen con la trayectoria y el mapa estimado.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="instalacion-icm-slam">
+<h2>Instalación ICM_SLAM<a class="headerlink" href="#instalacion-icm-slam" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Es posible correr el algoritmo sin que intervenga ROS. Para esto descargar el código fuente en <em>icm_slam</em> e implementar las modificaciones necesarias. (?)</p>
+</div>
+<div class="section" id="explicacion-del-funcionamiento-desactualizado">
+<h2>Explicación del funcionamiento (desactualizado)<a class="headerlink" href="#explicacion-del-funcionamiento-desactualizado" title="Enlazar permanentemente con este título">¶</a></h2>
 <p>La idea de este modulo es poder configurar el slam desde <em>external_options.py</em> y <em>config_default.yaml</em>.</p>
+</div>
 <div class="section" id="external-options">
 <h2>external_options<a class="headerlink" href="#external-options" title="Enlazar permanentemente con este título">¶</a></h2>
 <p>En este archivo se define la estructura del programa principal y se ejecutan los modulos de <em>ICM_SLAM.py</em>. Para un correcto funcionamiento es encesario definir:</p>
-<p><strong>g</strong>: Ec. cinemática del vehículo. Definida en <span id="id2"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
+<p><strong>g</strong>: Ec. cinemática del vehículo. Definida en <span id="id3"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">ut</span><span class="p">):</span>
     <span class="n">xt</span><span class="o">=</span><span class="n">xt</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">ut</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
@@ -50,7 +134,7 @@
     <span class="k">return</span> <span class="n">gg</span>
 </pre></div>
 </div>
-<p><strong>h</strong>: Ec. de medición. Definida en <span id="id3"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Poner un ejemplo de implementación.</p>
+<p><strong>h</strong>: Ec. de medición. Definida en <span id="id4"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Poner un ejemplo de implementación.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span><span class="n">zt</span><span class="p">):</span>
     <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mapa_visto</span>
     <span class="n">alfa</span><span class="o">=</span><span class="n">zt</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">xt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span>
@@ -67,7 +151,7 @@
 </div>
 <div class="section" id="optativamente">
 <h3>Optativamente<a class="headerlink" href="#optativamente" title="Enlazar permanentemente con este título">¶</a></h3>
-<p><strong>fun_x</strong>: Es el argumento de la función definido en la Ec. (11) de <span id="id4"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal <strong>causal</strong> (que depende solo del tiempo actual y de los pasados). Ya que se ejecutará en la etapa de inicialización <strong>online</strong>.</p>
+<p><strong>fun_x</strong>: Es el argumento de la función definido en la Ec. (11) de <span id="id5"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal <strong>causal</strong> (que depende solo del tiempo actual y de los pasados). Ya que se ejecutará en la etapa de inicialización <strong>online</strong>.</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fun_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -119,7 +203,7 @@
 </pre></div>
 </div>
 </div></blockquote>
-<p><strong>fun_xn</strong>: Es el argumento de la función definido en la Ec. (14) de <span id="id5"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal. Ya que se ejecutará en la etapa de optimizacion <strong>offline</strong>. En general dicha función puede incluir en su calculo la salida de la funcion <em>fun_x</em>.</p>
+<p><strong>fun_xn</strong>: Es el argumento de la función definido en la Ec. (14) de <span id="id6"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>. Es necesario que dicha función devuelva un valor pequeño para aquellos valores más probables del estado del robot y valores grandes para valores mas improbables. Esta función puede depender de cualquier señal. Ya que se ejecutará en la etapa de optimizacion <strong>offline</strong>. En general dicha función puede incluir en su calculo la salida de la funcion <em>fun_x</em>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fun_xn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Función a minimizar.</span>
@@ -166,8 +250,8 @@
 </div>
 <div class="section" id="config-default-yaml">
 <h2>config_default.yaml<a class="headerlink" href="#config-default-yaml" title="Enlazar permanentemente con este título">¶</a></h2>
-<p>En este archivo se definen los parámetros de configuración del sistema. A continuación se pone una copia de los datos utilizados en  <span id="id6"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
-<div class="highlight-yaml notranslate" id="id7"><div class="highlight"><pre><span></span><span class="nt">D</span><span class="p">:</span>
+<p>En este archivo se definen los parámetros de configuración del sistema. A continuación se pone una copia de los datos utilizados en  <span id="id7"><a class="reference internal" href="../index.html#id7">GAT+18</a></span>.</p>
+<div class="highlight-yaml notranslate" id="id8"><div class="highlight"><pre><span></span><span class="nt">D</span><span class="p">:</span>
     <span class="nt">N</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
     <span class="nt">deltat</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.1</span>
     <span class="nt">L</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1000</span>
@@ -260,6 +344,9 @@ python ICM_SLAM/scripts/sensors.py
 <li class="toctree-l1"><a class="reference internal" href="campo.html">Campo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ICM SLAM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#instalacion-icm-slam-ros">Instalación ICM_SLAM + ROS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#instalacion-icm-slam">Instalación ICM_SLAM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#explicacion-del-funcionamiento-desactualizado">Explicación del funcionamiento (desactualizado)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#external-options">external_options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#config-default-yaml">config_default.yaml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#implementaciones">Implementaciones</a></li>

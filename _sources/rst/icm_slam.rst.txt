@@ -3,6 +3,90 @@
 ICM SLAM
 ===================
 
+Instalación ICM_SLAM + ROS
+--------------------------
+A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS.
+
+ - Inicialmente es necesario instalar `Docker <https://docs.docker.com/get-docker/>`_  
+ - Descargar la última versión de la `implementación en ros <https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file>`_
+ - Descomprima el archivo .zip descargado. Abra una terminal del sistema operativo y dirijase a la carpeta en donde descomprimió el archivo.
+
+ - Luego ingrese el siguiente comando.
+
+.. code-block:: bash
+
+ docker build -t ros-bridge .
+
+Se van a descargar unos paquetes, esta operación puede tardar mucho tiempo. Depende de su velocidad de conexión.
+
+ - Una vez que finalice el anterior paso, ejecutar:
+
+.. code-block:: bash
+
+ docker-compose up -d 
+
+Este comando va a crear una red ROS funcionando en background. Es necesario que quede corriendo mientras se trabaja con ROS ya que además de generar un puente entre la virtualización (mediante Docker) y la maquina host, corre tambien *roscore*. Esta última aplicación es necesaria para que funcione ROS.
+Para desactivarlo, ingrese el siguiente comando:
+
+.. code-block:: bash
+
+ docker-compose down
+
+En esta misma carpeta hay otra carpeta que se llama "bags". Esta es una carpeta compartida con la virtualizacion, los datos almacenados en la carpeta "bags" apareceran en la carpeta "/home" de la virtualizacion. Si desea compartir otra carperta debe modificar el archivo docker-compose.yml y en la linea donde dice "source: ./bags" rempleazar ./bags por la ruta de la carpeta que desea compartir. 
+
+ - Para reproducir un archivo *.bag* ejecutar en otra terminal:
+
+ .. code-block:: bash
+
+  docker exec -it docker_ros-bridge_1 bash
+
+Luego, una vez dentro de la virtualización ingresar los siguientes comandos en orden:
+
+ .. code-block:: bash
+
+  cd /home
+  source iniciar.sh
+
+Ahora ya se esta en condiciones de ejecutar cualquier archivo .bag, por ejemplo lo puede hacer de la siguiente manera:
+
+ .. code-block:: bash
+ 
+  rosbag play data.bag
+
+Esto reproducirá la grabación almacenada en *data.bag* . Si preciona la tecla *space* la repdocucción se pausará. Si preciona la combinación de teclas *ctrl+c* se corta la reproducción.
+
+Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo *icm_slam*. Para esto descargar la última versión disponible en `icm_slam <https://www.mediafire.com/file/yi6tg57fel15laz/ros_bridge_v2_1.zip/file>`_ e instalar `Python 3 <https://www.python.org/downloads/>`_ si es que no lo tiene aún. Luego siga las siguientes instrucciones:
+
+ - Descomprimir el archivo.
+ - En la carpeta que descomprimió el archivo ejecutar los siguientes comandos para preparar el entorno de ejecución:
+
+ .. code-block:: bash
+
+  python3 -m venv env
+  source env/bin/activate
+  python -m pip install -U pip
+  python3 -m pip install -r requisitos.txt
+
+Ya se esta en condiciones de ejecutar el algoritmo. Para esto, debe poner en funcionamiento la virtualización (mediante el comando *docker-compose up -d* ) , luego en la carpeta donde descomprimió ejecutar:
+
+
+ .. code-block:: bash
+
+  python example.bag
+
+Si todo funciona correctamente debería salir el mensaje: "Conectado a la red ROS".
+
+ - Cuando se comience a reproducir una base de datos, el código de python comenzará a recibir la información y creará una imagen con la trayectoria y el mapa estimado. 
+
+
+Instalación ICM_SLAM 
+---------------------
+
+Es posible correr el algoritmo sin que intervenga ROS. Para esto descargar el código fuente en *icm_slam* e implementar las modificaciones necesarias. (?)  
+
+Explicación del funcionamiento (desactualizado)
+------------------------------------------------
+
 La idea de este modulo es poder configurar el slam desde *external_options.py* y *config_default.yaml*. 
 
 external_options
