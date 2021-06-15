@@ -33,80 +33,8 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-slam_benchmark.scripts.test">
-<span id="slam-benchmark-scripts-test"></span><h1>slam_benchmark.scripts.test<a class="headerlink" href="#module-slam_benchmark.scripts.test" title="Enlazar permanentemente con este título">¶</a></h1>
-<p>Este codigo hace 2 cosas: 
-.- Lee los .bag y genera un .csv
-.- Calcula y grafica los errores de la estimacion</p>
-<p class="rubric">Functions</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">automatic</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">err_indx</span></code>(odo, slam, gt)</p></td>
-<td><p>Calcula el error entre el groundtruth (gt) y las otras estimaciones.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">euler_from_quaternion</span></code>(R)</p></td>
-<td><p>Convert a quaternion into euler angles (roll, pitch, yaw) roll is rotation around x in radians (counterclockwise) pitch is rotation around y in radians (counterclockwise) yaw is rotation around z in radians (counterclockwise)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_df</span></code>([bag_config])</p></td>
-<td><p>Esta funcion lee un bag y genera un dataframe del topic que se busca almacenar.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_index</span></code>(gt, slam)</p></td>
-<td><p>Genera un nuevo dataframe dandole el formato adecuado a cada variable</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_csvs</span></code>()</p></td>
-<td><p>carga en la ram los dataframe</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">online</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">override_dataframe</span></code>(df)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotting</span></code>(gt, slam, errDF)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quaternion2euler</span></code>(data, i)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_csvs</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_csvs_odom</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str2array</span></code>([txt])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">view_info</span></code>([msgg])</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Classes</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BagConfig</span></code>([filepath, frame_id, topic_find])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BagPose</span></code>([filepath, frame_id, topic_find])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BagTf</span></code>([filepath, frame_id, topic_find])</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
+  <div class="section" id="slam-benchmark-scripts-test">
+<h1>slam_benchmark.scripts.test<a class="headerlink" href="#slam-benchmark-scripts-test" title="Enlazar permanentemente con este título">¶</a></h1>
 </div>
 
 

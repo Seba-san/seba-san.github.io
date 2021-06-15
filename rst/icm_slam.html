@@ -66,12 +66,16 @@ Para desactivarlo, ingrese el siguiente comando:</p>
 <p>En esta misma carpeta hay otra carpeta que se llama «bags». Esta es una carpeta compartida con la virtualizacion, los datos almacenados en la carpeta «bags» apareceran en la carpeta «/home» de la virtualizacion. Si desea compartir otra carperta debe modificar el archivo docker-compose.yml y en la linea donde dice «source: ./bags» rempleazar ./bags por la ruta de la carpeta que desea compartir.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Para reproducir un archivo <em>.bag</em> ejecutar en otra terminal:</p></li>
+<li><p>Para reproducir un archivo <em>.bag</em>, en otra terminal posicionarse en la carpeta donde descomprimió el archivo <em>.zip de docker</em> y  ejecutar el siguiente comando:</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it docker_ros-bridge_1 bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it <span class="si">${</span><span class="nv">NOMBRE</span><span class="p"> DE LA CARPETA</span><span class="si">}</span>_ros-bridge_1 bash
 </pre></div>
 </div>
 </div></blockquote>
+<p>donde ${NOMBRE DE LA CARPETA} es el nombre de la carpeta en donde se encuentra almacenado el archivo <em>docker-compose.yaml</em>, por ejemplo:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it ros_implementacion_ros-bridge_1 bash
+</pre></div>
+</div>
 <p>Luego, una vez dentro de la virtualización ingresar los siguientes comandos en orden:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /home
@@ -79,14 +83,14 @@ Para desactivarlo, ingrese el siguiente comando:</p>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Ahora ya se esta en condiciones de ejecutar cualquier archivo .bag, por ejemplo lo puede hacer de la siguiente manera:</p>
+<p>Ahora ya se esta en condiciones de reproducir cualquier archivo .bag, por ejemplo lo puede hacer de la siguiente manera:</p>
 <blockquote>
 <div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosbag play data.bag
 </pre></div>
 </div>
 </div></blockquote>
 <p>Esto reproducirá la grabación almacenada en <em>data.bag</em> . Si preciona la tecla <em>space</em> la repdocucción se pausará. Si preciona la combinación de teclas <em>ctrl+c</em> se corta la reproducción.</p>
-<p>Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo <em>icm_slam</em>. Para esto descargar la última versión disponible en <a class="reference external" href="https://www.mediafire.com/file/sy6m4s0679psmrv/ros_bridge_v2_1.zip/file">icm_slam</a> e instalar <a class="reference external" href="https://www.python.org/downloads/">Python 3</a> si es que no lo tiene aún. Luego siga las siguientes instrucciones:</p>
+<p>Una vez de realizado el anterior procedimiento, se esta en condiciones de probar el algoritmo <em>icm_slam</em>. Para esto descargar la última versión disponible en <a class="reference external" href="https://www.mediafire.com/file/gywkldarx46k4my/ICM_SLAM_ROS_v2_1.zip/file">icm_slam</a> e instalar <a class="reference external" href="https://www.python.org/downloads/">Python 3</a> si es que no lo tiene aún. Luego siga las siguientes instrucciones:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>Descomprimir el archivo.</p></li>
@@ -99,18 +103,53 @@ python3 -m pip install -r requisitos.txt
 </pre></div>
 </div>
 </div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>En sistemas con Windows, las anteriores lineas son:</p>
+<div class="line-block">
+<div class="line">py -m venv env</div>
+<div class="line">py -m venv env/bin/activate</div>
+<div class="line">py -m pip install -U pip</div>
+<div class="line">py -m pip install -r requisitos.txt</div>
+</div>
+</div>
 <p>Ya se esta en condiciones de ejecutar el algoritmo. Para esto, debe poner en funcionamiento la virtualización (mediante el comando <a class="reference internal" href="#launch-ros-bridge"><span class="std std-ref">launch ros_bridge</span></a>), luego en la carpeta donde descomprimió ejecutar:</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python example.bag
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python example.py
 </pre></div>
 </div>
 </div></blockquote>
 <p>Si todo funciona correctamente debería salir el mensaje: «Conectado a la red ROS».</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>Cuando se comience a reproducir una base de datos, el código de python comenzará a recibir la información y creará una imagen con la trayectoria y el mapa estimado.</p></li>
 </ul>
-</div></blockquote>
+</div>
+<div class="section" id="flujo-de-trabajo">
+<h2>Flujo de trabajo<a class="headerlink" href="#flujo-de-trabajo" title="Enlazar permanentemente con este título">¶</a></h2>
+<p>Una vez que este todo instalado y se compruebe el funcionamiento, el flujo de trabajo sería el siguiente:</p>
+<ul class="simple">
+<li><p>Posicionarse en la carpeta en donde se encuentra el archivo <em>docker-compose.yaml</em> y ejecutar:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Posicionarse en la carpeta donde esta el proyecto <em>icm slam</em> (en su interior tiene una carpeta con el nombre <em>env</em>) y luego ejecutar los siguientes comandos en orden:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> env/bin/activate
+python example.py
+</pre></div>
+</div>
+<p>Si todo esta funcionando bien, tendría que salir el mensaje: «Conectado a la red ROS».</p>
+<ul class="simple">
+<li><p>Ahora se está en condiciones de comenzar a reproducir cualquier archivo <em>.bag</em>, para esto en una nueva terminal ejecutar los siguientes comandos:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it ros_implementacion_ros-bridge_1 bash
+<span class="nb">cd</span> /home
+<span class="nb">source</span> iniciar.sh
+rosbag play data_IJAC2018.bag
+</pre></div>
+</div>
 </div>
 <div class="section" id="procedimiento-de-ejecucion-sin-docker">
 <h2>Procedimiento de ejecución sin Docker<a class="headerlink" href="#procedimiento-de-ejecucion-sin-docker" title="Enlazar permanentemente con este título">¶</a></h2>
@@ -167,6 +206,7 @@ python ICM_SLAM/scripts/sensors.py
 <li class="toctree-l1"><a class="reference internal" href="sm_bk.html">Slam Benchmark</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ICM SLAM</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#instalacion-icm-slam-ros">Instalación ICM_SLAM + ROS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flujo-de-trabajo">Flujo de trabajo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#procedimiento-de-ejecucion-sin-docker">Procedimiento de ejecución sin Docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#funcionamiento-script-sensors-py">Funcionamiento script sensors.py</a></li>
 </ul>
