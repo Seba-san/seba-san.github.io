@@ -5,10 +5,10 @@ ICM SLAM
 
 Instalación ICM_SLAM + ROS
 --------------------------
-A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS.
+A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS. El objetivo de este instructivo es guiar a un usuario *no familiarizado* con las distintas tecnologías aquí utilizadas. Cualquier complicación contactarse a la siguiente direccion: **ssansoni at inaut.unsj.edu.ar**
 
  - Inicialmente es necesario instalar `Docker <https://docs.docker.com/get-docker/>`_  
- - Descargar la última versión de la `ROS_bridge_docker <https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file>`_
+ - Descargar la última versión de la `ROS_bridge_docker <https://www.mediafire.com/file/fr43ngnqapdpgy6/docker_v2_1.zip/file>`_
  - Descomprima el archivo .zip descargado. Abra una terminal del sistema operativo y dirijase a la carpeta en donde descomprimió el archivo.
 
  - Luego ingrese el siguiente comando:
@@ -45,8 +45,12 @@ donde ${NOMBRE DE LA CARPETA} es el nombre de la carpeta en donde se encuentra a
 
 .. code-block:: bash
 
-    docker exec -it ros_implementacion_ros-bridge_1 bash
+    docker exec -it docker_v2_1_ros-bridge_1 bash
 
+.. note::
+    Otra forma de ejecutar este comando evitando este conflicto es:
+    
+    docker-compose exec ros-bridge bash
 
 Luego, una vez dentro de la virtualización ingresar los siguientes comandos en orden:
 
@@ -120,8 +124,8 @@ Si todo esta funcionando bien, tendría que salir el mensaje: "Conectado a la re
 
 
 .. code-block:: bash
-
-    docker exec -it ros_implementacion_ros-bridge_1 bash
+    
+    docker-compose exec ros-bridge bash
     cd /home
     source iniciar.sh
     rosbag play data_IJAC2018.bag

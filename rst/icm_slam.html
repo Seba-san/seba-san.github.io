@@ -37,11 +37,11 @@
 <span id="id1"></span><h1>ICM SLAM<a class="headerlink" href="#icm-slam" title="Enlazar permanentemente con este título">¶</a></h1>
 <div class="section" id="instalacion-icm-slam-ros">
 <h2>Instalación ICM_SLAM + ROS<a class="headerlink" href="#instalacion-icm-slam-ros" title="Enlazar permanentemente con este título">¶</a></h2>
-<p>A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS.</p>
+<p>A continuación se desarrollan los pasos que hay que seguir para poder ejecutar el algoritmo ICM_SLAM en una red ROS. El objetivo de este instructivo es guiar a un usuario <em>no familiarizado</em> con las distintas tecnologías aquí utilizadas. Cualquier complicación contactarse a la siguiente direccion: <strong>ssansoni at inaut.unsj.edu.ar</strong></p>
 <blockquote>
 <div><ul class="simple">
 <li><p>Inicialmente es necesario instalar <a class="reference external" href="https://docs.docker.com/get-docker/">Docker</a></p></li>
-<li><p>Descargar la última versión de la <a class="reference external" href="https://www.mediafire.com/file/esaom1qt9yf2lyh/ros_implementation_v2_1.zip/file">ROS_bridge_docker</a></p></li>
+<li><p>Descargar la última versión de la <a class="reference external" href="https://www.mediafire.com/file/fr43ngnqapdpgy6/docker_v2_1.zip/file">ROS_bridge_docker</a></p></li>
 <li><p>Descomprima el archivo .zip descargado. Abra una terminal del sistema operativo y dirijase a la carpeta en donde descomprimió el archivo.</p></li>
 <li><p>Luego ingrese el siguiente comando:</p></li>
 </ul>
@@ -73,8 +73,13 @@ Para desactivarlo, ingrese el siguiente comando:</p>
 </div>
 </div></blockquote>
 <p>donde ${NOMBRE DE LA CARPETA} es el nombre de la carpeta en donde se encuentra almacenado el archivo <em>docker-compose.yaml</em>, por ejemplo:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it ros_implementacion_ros-bridge_1 bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it docker_v2_1_ros-bridge_1 bash
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Nota</p>
+<p>Otra forma de ejecutar este comando evitando este conflicto es:</p>
+<p>docker-compose exec ros-bridge bash</p>
 </div>
 <p>Luego, una vez dentro de la virtualización ingresar los siguientes comandos en orden:</p>
 <blockquote>
@@ -144,7 +149,7 @@ python example.py
 <ul class="simple">
 <li><p>Ahora se está en condiciones de comenzar a reproducir cualquier archivo <em>.bag</em>, para esto en una nueva terminal ejecutar los siguientes comandos:</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it ros_implementacion_ros-bridge_1 bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose <span class="nb">exec</span> ros-bridge bash
 <span class="nb">cd</span> /home
 <span class="nb">source</span> iniciar.sh
 rosbag play data_IJAC2018.bag
